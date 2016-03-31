@@ -117,7 +117,7 @@ class LocbitPlugin(octoprint.plugin.SettingsPlugin,
             ## if username:
             ## This is where you log your fields
             
-            message['uid'] = 3432            
+            message['uid'] = '3432'            
             message['did'] = 'jdfhs'
 
             ## if an icon is set, use that. if not, use the emoji.
