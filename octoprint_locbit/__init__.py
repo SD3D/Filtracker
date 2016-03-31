@@ -150,6 +150,8 @@ class LocbitPlugin(octoprint.plugin.SettingsPlugin,
             attachment['pretext'] = event['Message']
             attachment['color'] = event['Color']
 
+            self._logger.exception("What and What are you sending to Locbit:\n {}".data)
+
             self._logger.debug("Attempting post of Locbit message: {}".format(message))
             try:
                 res = requests.post(webhook_url, data=json.dumps(message))
