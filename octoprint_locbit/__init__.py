@@ -130,11 +130,11 @@ class LocbitPlugin(octoprint.plugin.SettingsPlugin,
                 message['icon_emoji'] = icon_emoji
 
             ## message settings
-            message['attachments'] = [{}]
-            attachment = message['attachments'][0]
-            attachment['fields'] = []
-            attachment['fields'].append( { "title": "Filename", "value": filename, "short": True } )
-            attachment['fields'].append( { "title": "Origin", "value": origin, "short": True } )
+#             message['attachments'] = [{}]
+#             attachment = message['attachments'][0]
+#             attachment['fields'] = []
+#             attachment['fields'].append( { "title": "Filename", "value": filename, "short": True } )
+#             attachment['fields'].append( { "title": "Origin", "value": origin, "short": True } )
 
             ## event settings
             event = self._settings.get(['print_events', event], merged=True)
@@ -146,9 +146,9 @@ class LocbitPlugin(octoprint.plugin.SettingsPlugin,
             else:
                 elapsed_time = ""
 
-            attachment['fallback'] = event['Fallback'].format(**{'filename': filename, 'time':elapsed_time})
-            attachment['pretext'] = event['Message']
-            attachment['color'] = event['Color']
+#             attachment['fallback'] = event['Fallback'].format(**{'filename': filename, 'time':elapsed_time})
+#             attachment['pretext'] = event['Message']
+#             attachment['color'] = event['Color']
 
             data1=json.dumps(message)
             self._logger.exception("What and What are you sending to Locbit:\n {}".format(data1))
