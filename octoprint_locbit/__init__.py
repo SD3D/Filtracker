@@ -151,7 +151,8 @@ class LocbitPlugin(octoprint.plugin.SettingsPlugin,
             attachment['color'] = event['Color']
 
             data1=json.dumps(message)
-            self._logger.exception("What and What are you sending to Locbit:\n {}".data1)
+            self._logger.exception("What and What are you sending to Locbit:\n {}".format(data1))
+            self._logger.exception("What and What are you sending to Locbit:\n {}".format(message))
 
             self._logger.debug("Attempting post of Locbit message: {}".format(message))
             try:
