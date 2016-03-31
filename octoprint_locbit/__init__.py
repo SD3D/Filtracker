@@ -111,6 +111,14 @@ class LocbitPlugin(octoprint.plugin.SettingsPlugin,
             username = self._settings.get(['bot_username'])
             if username:
                 message['username'] = username
+                
+            ## Addition for uid / did 
+            ## username = self._settings.get(['bot_username'])
+            ## if username:
+            ## This is where you log your fields
+            
+            message['uid'] = 3432            
+            message['did'] = 'jdfhs'
 
             ## if an icon is set, use that. if not, use the emoji.
             ## if neither are set, it will default to the webhook icon/emoji
