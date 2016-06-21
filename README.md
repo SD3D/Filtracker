@@ -1,6 +1,6 @@
 # OctoPrint-Locbit
 
-**TODO:** Describe what your plugin does.
+Locbit Octoprint integration.
 
 ## Setup
 
@@ -8,11 +8,3 @@ Install via the bundled [Plugin Manager](https://github.com/foosel/OctoPrint/wik
 or manually using this URL:
 
     https://github.com/Locbit/OctoPrint-Locbit/archive/master.zip
-
-**TODO:** Describe how to install your plugin, if more needs to be done than just installing it via pip or through
-the plugin manager.
-
-## Configuration
-
-**TODO:** Describe your plugin's configuration options (if any).
-# test
