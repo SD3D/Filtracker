@@ -1,175 +1,113 @@
-# coding=utf-8
 from __future__ import absolute_import
+from httplib import BadStatusLine
+from .locbitNotifications import locbitMsgDict
 
 import octoprint.plugin
-import os
-import json
 import requests
 
-class LocbitPlugin(octoprint.plugin.SettingsPlugin,
-                  octoprint.plugin.TemplatePlugin,
-                  octoprint.plugin.EventHandlerPlugin):
+Layer = 0
+uid = "55de667a295efb62093205e4"
+# url = "http://192.168.0.34:3000"
+url = "http://api.locbit.com:8888/general/endpoint"
 
-    ## SettingsPlugin
+class LocbitPlugin(octoprint.plugin.StartupPlugin,
+			octoprint.plugin.TemplatePlugin,
+			octoprint.plugin.SettingsPlugin,
+			octoprint.plugin.EventHandlerPlugin):
+	
+	def on_after_startup(self):
+		self._logger.info("Hello world! I am: %s" % self._settings.get(["did"]))
 
-    def get_settings_defaults(self):
-        return dict(
-                webhook_url="",
-                print_events=dict(
-                    PrintStarted=dict(
-                        Enabled=True,
-                        Message="A new print has started! :muscle:",
-                        Fallback="Print started! Filename: {filename}",
-                        Color="good",
-                        ),
-                    PrintFailed=dict(
-                        Enabled=True,
-                        Message="Oh no! The print has failed... :rage2:",
-                        Fallback="Print failed! Filename: {filename}",
-                        Color="danger",
-                        ),
-                    PrintCancelled=dict(
-                        Enabled=True,
-                        Message="Uh oh... someone cancelled the print! :crying_cat_face:",
-                        Fallback="Print cancelled! Filename: {filename}",
-                        Color="danger",
-                        ),
-                    PrintDone=dict(
-                        Enabled=True,
-                        Message="Print finished successfully! :thumbsup:",
-                        Fallback="Print started! Filename: {filename}, Time: {time}",
-                        Color="good",
-                        ),
-                    PrintPaused=dict(
-                        Enabled=True,
-                        Message="Printing has been paused... :sleeping:",
-                        Fallback="Print paused... Filename: {filename}",
-                        Color="warning",
-                        ),
-                    PrintResumed=dict(
-                        Enabled=True,
-                        Message="Phew! Printing has been resumed! Back to work... :hammer:",
-                        Fallback="Print resumed! Filename: {filename}",
-                        Color="good",
-                        ),
-                    ),
-                )
+	def get_settings_defaults(self):
+		return dict(did="TEST_PRINTER")
 
-    def get_settings_version(self):
-        return 3
+	def get_template_configs(self):
+		return [
+			dict(type="navbar", custom_bindings=False),
+			dict(type="settings", custom_bindings=False)
+		]
 
-    def on_settings_migrate(self, target, current):
-        if current == 1 or current == 2:
-            events = self._settings.get(['events'])
-            # migrate events
-            print_events = self._settings.get(['print_events'])
-            if events:
-                for event in events:
-                    if not events[event]:
-                        self._settings.set_boolean(['print_events',event,'Enabled'], False)
-            # remove old settings if there
-            self._settings.set(['enabled'], None)
-            self._settings.set(['events'], None)
-            # clean up old fallback messages from <1.2.7 oversaving
-            for event in print_events:
-                try:
-                    self._settings.remove(['print_events',event,'Fallback'])
-                except ValueError:
-                    # Remove fallback for bug in 1.2.8 and earlier
-                    self._settings.settings.remove(self._settings._prefix_path(['print_events', event, 'Fallback']))
+	def on_event(self, event, payload, **kwargs):
+		global Layer
+		global uid
+		global url
+		did = self._settings.get(["did"])
+		
+		self.checkPrinterStatus()
 
-    ## TemplatePlugin
+		if event == "PrintStarted":
+			Layer = 0
+			self.sendLayerStatus(Layer)
+		elif event == "PrintFailed":
+			Layer = 0
+			self.sendLayerStatus(Layer)
+		elif event == "PrintCancelled":
+			Layer = 0
+			self.sendLayerStatus(Layer)
 
-    def get_template_configs(self):
-        return [dict(type="settings", name="Locbit", custom_bindings=False)]
+		if event in locbitMsgDict:
+			event_body = {
+				'uid' : uid,
+				'did' : did,
+				'event' : locbitMsgDict[event]['name'],
+				'status' : locbitMsgDict[event]['value']
+			}
+		elif event == 'FileSelected':
+			event_body = {
+				'uid' : uid,
+				'did' : did,
+				'event' : 'File',
+				'status' : payload['filename']
+			}
+		elif event == 'ZChange':
+			Layer += 1
+			event_body = {
+				'uid' : uid,
+				'did' : did,
+				'event' : 'Layer',
+				'status' : Layer
+			}
+		else:
+			event_body = { 
+				'uid' : uid,
+				'did' : did,
+				'event': event
+			}
 
-    ## EventPlugin
+		try:
+			requests.post(url, data = event_body)
+		except BadStatusLine:
+			self._logger.info("Locbit: Bad Status")
 
-    def on_event(self, event, payload):
-        events = self._settings.get(['print_events'], merged=True)
+		self._logger.info("Locbit: Recording event " + event)
 
-        if event in events and events[event] and events[event]['Enabled']:
+	def sendLayerStatus(self, layer):
+		global uid
+		global url
+		did = self._settings.get(["did"])
 
-            webhook_url = self._settings.get(['webhook_url'])
-            if not webhook_url:
-                self._logger.exception("Locbit Webhook URL not set!")
-                return
+		event_body = {
+			'uid' : uid,
+			'did' : did,
+			'event' : 'Layer',
+			'status' : layer
+		}
 
-            filename = os.path.basename(payload["file"])
-            if payload['origin'] == 'local':
-                origin = "Local"
-            elif payload['origin'] == 'sdcard':
-                origin = "SD Card"
-            else:
-                origin = payload['origin']
+		try:
+			requests.post(url, data = event_body)
+		except BadStatusLine:
+			self._logger.info("Locbit: Bad Status")
 
-            message = {}
+	def checkPrinterStatus(self):
+		url = "http://localhost/api/printer"
+		apiKey = self._settings.get(["apiKey"])
 
-            ## bot display settings
+		try:
+			r = requests.get(url,  headers = { "X-Api-Key" : apiKey })
+			self._logger.info(r.text)
+		except BadStatusLine:
+			self._logger.info("Locbit: Bad Status")
 
-            ## if no username is set, it will default to the webhook username
-            username = self._settings.get(['bot_username'])
-            if username:
-                message['username'] = username
-                
-            ## Addition for uid / did 
-            ## username = self._settings.get(['bot_username'])
-            ## if username:
-            ## This is where you log your fields
-            
-            message['uid'] = '3432'            
-            message['did'] = 'jdfhs'
-
-            ## if an icon is set, use that. if not, use the emoji.
-            ## if neither are set, it will default to the webhook icon/emoji
-            icon_url = self._settings.get(['bot_icon_url'])
-            icon_emoji = self._settings.get(['bot_icon_emoji'])
-            if icon_url:
-                message['icon_url'] = icon_url
-            elif icon_emoji:
-                message['icon_emoji'] = icon_emoji
-
-            ## message settings
-#             message['attachments'] = [{}]
-#             attachment = message['attachments'][0]
-#             attachment['fields'] = []
-#             attachment['fields'].append( { "title": "Filename", "value": filename, "short": True } )
-#             attachment['fields'].append( { "title": "Origin", "value": origin, "short": True } )
-
-            ## event settings
-            event = self._settings.get(['print_events', event], merged=True)
-
-            import datetime
-            import octoprint.util
-            if "time" in payload and payload["time"]:
-                elapsed_time = octoprint.util.get_formatted_timedelta(datetime.timedelta(seconds=payload["time"]))
-            else:
-                elapsed_time = ""
-
-#             attachment['fallback'] = event['Fallback'].format(**{'filename': filename, 'time':elapsed_time})
-#             attachment['pretext'] = event['Message']
-#             attachment['color'] = event['Color']
-
-            data1=json.dumps(message)
-            self._logger.exception("What and What are you sending to Locbit:\n {}".format(data1))
-            self._logger.exception("What and What are you sending to Locbit:\n {}".format(message))
-
-            self._logger.debug("Attempting post of Locbit message: {}".format(message))
-            try:
-                res = requests.post(webhook_url, data=json.dumps(message))
-            except Exception, e:
-                self._logger.exception("An error occurred connecting to Locbit:\n {}".format(e.message))
-                return
-
-            if not res.ok:
-                self._logger.exception("An error occurred posting to Locbit:\n {}".format(res.text))
-                return
-
-            self._logger.debug("Posted event successfully to Locbit!")
-
-        else:
-            self._logger.debug("Locbit not configured for event.")
-            return
 
 __plugin_name__ = "Locbit"
 __plugin_implementation__ = LocbitPlugin()
