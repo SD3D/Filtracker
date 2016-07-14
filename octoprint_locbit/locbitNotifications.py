@@ -3,39 +3,39 @@ import octoprint.util
 
 locbitMsgDict = {
 	'Connected' : {
-		'name' : 'Printer Status',
+		'name' : 'PrinterStatus',
 		'value' : 'Connected'
 	},
 	'Disconnected' : {
-		'name' : 'Printer Status',
+		'name' : 'PrinterStatus',
 		'value' : 'Disconnected'
 	},
 	'Error' : {
-		'name' : 'Printer Status',
+		'name' : 'PrinterStatus',
 		'value' : 'Error'
 	},
 	'PrintStarted' : {
-		'name' : 'Printing Status',
+		'name' : 'PrintingStatus',
 		'value' : 'Printing'
 	},
 	'PrintFailed' : {
-		'name' : 'Printing Status',
+		'name' : 'PrintingStatus',
 		'value' : 'Failed'
 	},
 	'PrintDone' : {
-		'name' : 'Printing Status',
+		'name' : 'PrintingStatus',
 		'value' : 'Complete'
 	},
 	'PrintCancelled' : {
-		'name' : 'Printing Status',
+		'name' : 'PrintingStatus',
 		'value' : 'Cancelled'
 	},
 	'PrintPaused' : {
-		'name' : 'Printing Status',
+		'name' : 'PrintingStatus',
 		'value' : 'Paused'
 	},
 	'PrintResumed' : {
-		'name' : 'Printing Status',
+		'name' : 'PrintingStatus',
 		'value' : 'Printing'
 	},
 	'FileDeselected' : {

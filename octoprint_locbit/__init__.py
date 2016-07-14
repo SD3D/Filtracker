@@ -8,7 +8,7 @@ import requests
 Layer = 0
 uid = "55de667a295efb62093205e4"
 # url = "http://192.168.0.34:3000"
-url = "http://api.locbit.com:8888/general/endpoint"
+url = "http://api.locbit.com:8888/endpoint"
 
 class LocbitPlugin(octoprint.plugin.StartupPlugin,
 			octoprint.plugin.TemplatePlugin,
