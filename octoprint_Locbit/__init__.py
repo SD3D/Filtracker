@@ -13,8 +13,9 @@ url = "http://api.locbit.com:8888/endpoint"
 class LocbitPlugin(octoprint.plugin.StartupPlugin,
 			octoprint.plugin.TemplatePlugin,
 			octoprint.plugin.SettingsPlugin,
-			octoprint.plugin.EventHandlerPlugin):
-	
+			octoprint.plugin.EventHandlerPlugin,
+			octoprint.plugin.AssetPlugin):
+
 	def on_after_startup(self):
 		self._logger.info("Hello world! I am: %s" % self._settings.get(["did"]))
 
@@ -27,12 +28,15 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
 			dict(type="settings", custom_bindings=False)
 		]
 
+	def get_assets(self):
+		return dict(js=["js/Locbit.js"])
+
 	def on_event(self, event, payload, **kwargs):
 		global Layer
 		global uid
 		global url
 		did = self._settings.get(["did"])
-		
+
 		self.checkPrinterStatus()
 
 		if event == "PrintStarted":
@@ -68,7 +72,7 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
 				'status' : Layer
 			}
 		else:
-			event_body = { 
+			event_body = {
 				'uid' : uid,
 				'did' : did,
 				'event': event
