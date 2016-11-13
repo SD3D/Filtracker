@@ -23,6 +23,12 @@ $(function() {
                 element.before(text3 + ": <br>");
                 element.before(text4 + ": <br>");
             }
+
+            var code = '<div class="jog-panel"> <!-- QR Code control panel --> <div class="jog-panel" id="scan-qr-code"> <h1>QR Code</h1> <div> <button class="btn btn-block control-box"  data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() {}">Scan QR</button></div></div></div>';
+
+            var controlElement = $("#control");
+
+            controlElement.append(code);
         };
 
 
