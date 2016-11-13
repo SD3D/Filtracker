@@ -16,11 +16,11 @@ $(function() {
                 type: "GET",
                 url: "/api/plugin/Locbit",
                 success: function(data) {
-                    $('#material').append(data.material);
-                    $('#diameter').append(data.diameter);
-                    $('#color').append(data.color);
-                    $('#length').append(data.length);
-                    $('#muid').append(data.muid);
+                    $('#material').html(data.material);
+                    $('#diameter').html(data.diameter);
+                    $('#color').html(data.color);
+                    $('#length').html(data.length);
+                    $('#muid').html(data.muid);
                 }
         });
         }
