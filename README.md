@@ -8,3 +8,7 @@ Install via the bundled [Plugin Manager](https://github.com/foosel/OctoPrint/wik
 or manually using this URL:
 
     https://github.com/Locbit/OctoPrint-Locbit/archive/master.zip
+
+Requires the following commands to work
+
+    sudo apt-get install ipython python-opencv python-scipy python-numpy python-setuptools python-pip

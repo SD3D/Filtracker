@@ -11,24 +11,46 @@ $(function() {
         var filesState = parameters[2];
         var self = this;
 
+        function apiFetch() {
+            $.ajax({
+                type: "GET",
+                url: "/api/plugin/Locbit",
+                success: function(data) {
+                    $('#material').append(data.material);
+                    $('#diameter').append(data.diameter);
+                    $('#color').append(data.color);
+                    $('#length').append(data.length);
+                    $('#muid').append(data.muid);
+                }
+        });
+        }
+
         self.onStartup = function() {
             var element = $("#state").find(".accordion-inner .progress");
             if (element.length) {
+                var text0 = gettext("Material");
                 var text = gettext("Material Diameter (mm)");
                 var text2 = gettext("Color");
                 var text3 = gettext("Length (m)");
                 var text4 = gettext("MUID");
-                element.before(text + ": <br>");
-                element.before(text2 + ": <br>");
-                element.before(text3 + ": <br>");
-                element.before(text4 + ": <br>");
+                element.before(text0 + ": <strong id='material'></strong><br>");
+                element.before(text + ": <strong id='diameter'></strong><br>");
+                element.before(text2 + ": <strong id='color'></strong><br>");
+                element.before(text3 + ": <strong id='length'></strong><br>");
+                element.before(text4 + ": <strong id='muid'></strong><br>");
             }
 
-            var code = '<div class="jog-panel"> <!-- QR Code control panel --> <div class="jog-panel" id="scan-qr-code"> <h1>QR Code</h1> <div> <button class="btn btn-block control-box"  data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() {}">Scan QR</button></div></div></div>';
+            var code = '<div class="jog-panel"> <!-- QR Code control panel --> <div class="jog-panel" id="scan-qr-code"> <h1>QR Code</h1> <div> <button class="btn btn-block control-box" id="qr-btn" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { } ">Scan QR</button></div></div></div>';
 
             var controlElement = $("#control");
 
             controlElement.append(code);
+
+            $( "#qr-btn" ).bind( "click", function() {
+                apiFetch();
+            });
+
+
         };
 
 
