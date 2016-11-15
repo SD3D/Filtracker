@@ -109,5 +109,5 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
 			self._logger.info("Locbit: Bad Status")
 
 
-__plugin_name__ = "Locbit"
+__plugin_name__ = "SD3D"
 __plugin_implementation__ = LocbitPlugin()
