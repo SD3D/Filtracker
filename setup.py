@@ -14,20 +14,20 @@ plugin_package = "octoprint_Locbit"
 plugin_name = "OctoPrint-Locbit"
 
 # The plugin's version. Can be overwritten within OctoPrint's internal data via __plugin_version__ in the plugin module
-plugin_version = "0.1.0"
+plugin_version = "0.1.1"
 
 # The plugin's description. Can be overwritten within OctoPrint's internal data via __plugin_description__ in the plugin
 # module
-plugin_description = """Connect 3D printers to Locbit servers."""
+plugin_description = """Standardizing Digital Manufacturing."""
 
 # The plugin's author. Can be overwritten within OctoPrint's internal data via __plugin_author__ in the plugin module
-plugin_author = "Brandon Herbert"
+plugin_author = "David Feeney"
 
 # The plugin's author's mail address.
-plugin_author_email = "brandon@locbit.com"
+plugin_author_email = "david@sd3d.com"
 
 # The plugin's homepage URL. Can be overwritten within OctoPrint's internal data via __plugin_url__ in the plugin module
-plugin_url = "www.locbit.com"
+plugin_url = "www.sd3d.com"
 
 # The plugin's license. Can be overwritten within OctoPrint's internal data via __plugin_license__ in the plugin module
 plugin_license = "AGPLv3"
