@@ -12,3 +12,5 @@ or manually using this URL:
 Requires the following commands to work
 
     sudo apt-get install ipython python-opencv python-scipy python-numpy python-setuptools python-pip
+    sudo pip install https://github.com/sightmachine/SimpleCV/zipball/master
+    sudo apt-get install python-zbar
