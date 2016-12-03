@@ -7,6 +7,7 @@ import requests
 import flask
 
 
+
 Layer = 0
 uid = "55de667a295efb62093205e4"
 # url = "http://192.168.0.34:3000"
@@ -37,7 +38,15 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
 			self._logger.info("command2 called, some_parameter is {some_parameter}".format(**data))
 
 	def on_api_get(self, request):
-		return flask.jsonify(material="ABS",diameter="2.85mm",color="BLUE",length="110",muid="A0001")
+		import subprocess
+		answer = subprocess.check_output(['/home/pi/oprint/lib/python2.7/site-packages/OctoPrint-Locbit'
+										  '/octoprint_Locbit/qr.sh'])
+		qr_res = answer.split(",")
+		if len(qr_res) == 5:
+			return flask.jsonify(material=qr_res[0], diameter=qr_res[1], color=qr_res[2], length=qr_res[3],
+								 muid=qr_res[4])
+		else:
+			return "Invalid QR code"
 
 	def on_after_startup(self):
 		self._logger.info("Hello world! I am: %s" % self._settings.get(["did"]))

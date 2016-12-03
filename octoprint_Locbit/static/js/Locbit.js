@@ -16,11 +16,21 @@ $(function() {
                 type: "GET",
                 url: "/api/plugin/Locbit",
                 success: function(data) {
-                    $('#material').html(data.material);
-                    $('#diameter').html(data.diameter);
-                    $('#color').html(data.color);
-                    $('#length').html(data.length);
-                    $('#muid').html(data.muid);
+                    // $('#material').html(data);
+                    if (Object.keys(data).length == 5) {
+                        $('#material').html(data.material);
+                        $('#diameter').html(data.diameter);
+                        $('#color').html(data.color);
+                        $('#length').html(data.length);
+                        $('#muid').html(data.muid);
+                    }
+                    else {
+                        $('#qr-btn').after('<div id="qr-error">Invalid QR Code</div>');
+                        setTimeout(function(){
+                            $('#qr-error').remove();
+                        }, 2000);
+
+                    }
                 }
         });
         }
@@ -40,7 +50,7 @@ $(function() {
                 element.before(text4 + ": <strong id='muid'></strong><br>");
             }
 
-            var code = '<div class="jog-panel"> <!-- QR Code control panel --> <div class="jog-panel" id="scan-qr-code"> <h1>QR Code</h1> <div> <button class="btn btn-block control-box" id="qr-btn" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { } ">Scan QR</button></div></div></div>';
+            var code = '<div class="jog-panel"> <!-- QR Code control panel --> <div class="jog-panel" id="scan-qr-code"> <h1>QR Code</h1><div> <button class="btn btn-block control-box" id="qr-btn" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { } ">Scan QR</button></div></div></div>';
 
             var controlElement = $("#control");
 
