@@ -1,1 +1,3 @@
 include README.md
+recursive-include octoprint_Locbit/static *
+recursive-include octoprint_Locbit/templates *

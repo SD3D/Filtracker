@@ -39,8 +39,8 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
 
 	def on_api_get(self, request):
 		import subprocess
-		answer = subprocess.check_output(['/home/pi/oprint/lib/python2.7/site-packages/OctoPrint-Locbit'
-										  '/octoprint_Locbit/qr.sh'])
+		answer = subprocess.check_output(['/home/pi/oprint/lib/python2.7/site-packages'
+										  '/octoprint_Locbit/qr.py'])
 		qr_res = answer.split(",")
 		if len(qr_res) == 5:
 			return flask.jsonify(material=qr_res[0], diameter=qr_res[1], color=qr_res[2], length=qr_res[3],
