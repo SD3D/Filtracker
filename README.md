@@ -7,7 +7,7 @@ Locbit Octoprint integration.
 Install via the bundled [Plugin Manager](https://github.com/foosel/OctoPrint/wiki/Plugin:-Plugin-Manager)
 or manually using this URL:
 
-    https://github.com/Locbit/OctoPrint-Locbit/archive/master.zip
+    https://github.com/Locbit/OctoPrint-Locbit/archive/qr-code.zip
 
 Requires the following ssh commands to work
 
