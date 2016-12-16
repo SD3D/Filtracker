@@ -6,7 +6,7 @@ def scan():
     qrcode = []
     while(not qrcode):
         img_og = jc.getImage() #gets image from the camera
-        img = img_og.flipHorizontal() #corrects image flip so qr can data can be read
+        img = img_og
         qrcode = img.findBarcode() #finds qr data from image
 
         if(qrcode is not None): #if there is some data processed
