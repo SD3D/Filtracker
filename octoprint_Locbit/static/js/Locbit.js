@@ -20,6 +20,7 @@ $(function() {
                 url: "/api/plugin/Locbit",
                 success: function(data) {
                     // $('#material').html(data);
+                  if (data.hasOwnProperty('result')){
                     if (Object.keys(data).length == 5) {
                         $('#material').html(data.material);
                         $('#diameter').html(data.diameter);
@@ -30,13 +31,14 @@ $(function() {
                         $('#qr-btn').prop('disabled', false);
                     }
                     else {
-                        $('#qr-btn').after('<div id="qr-error">Invalid QR Code</div>');
-                        setTimeout(function(){
-                            $('#qr-error').remove();
-                        }, 2000);
                         $('#qr-btn').prop('disabled', false);
-
+                        alert('Invalid QR code. Please scan again.')
                     }
+
+                }
+                else if (data.hasOwnProperty('error')){
+                     $('#qr-btn').prop('disabled', false);
+                     alert("Error: " + data.error);
                 }
         });
         }
