@@ -12,6 +12,9 @@ $(function() {
         var self = this;
 
         function apiFetch() {
+
+            $('#qr-btn').prop('disabled', true);
+
             $.ajax({
                 type: "GET",
                 url: "/api/plugin/Locbit",
@@ -23,12 +26,15 @@ $(function() {
                         $('#color').html(data.color);
                         $('#length').html(data.length);
                         $('#muid').html(data.muid);
+                        
+                        $('#qr-btn').prop('disabled', false);
                     }
                     else {
                         $('#qr-btn').after('<div id="qr-error">Invalid QR Code</div>');
                         setTimeout(function(){
                             $('#qr-error').remove();
                         }, 2000);
+                        $('#qr-btn').prop('disabled', false);
 
                     }
                 }
