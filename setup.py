@@ -44,7 +44,7 @@ plugin_requires = []
 plugin_additional_data = []
 
 # Any additional python packages you need to install with your plugin that are not contained in <plugin_package>.*
-plugin_additional_packages = []
+plugin_additional_packages = ['timeout-decorator']
 
 # Any python packages within <plugin_package>.* you do NOT want to install with your plugin
 plugin_ignored_packages = []

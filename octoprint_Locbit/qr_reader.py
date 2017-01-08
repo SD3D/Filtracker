@@ -1,6 +1,10 @@
 from SimpleCV import Color, Camera, Display, JpegStreamCamera
+import time
+import timeout_decorator
 
+TIMEOUT_SECONDS = 15
 
+@timeout_decorator.timeout(TIMEOUT_SECONDS)
 def scan():
     jc = JpegStreamCamera("http://octopi.local/webcam/?action=stream")
     qrcode = []
