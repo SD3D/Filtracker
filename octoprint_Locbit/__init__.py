@@ -54,8 +54,12 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                        qr_result = qr_result.split(",")
  
 		       if len(qr_result) == 5:
-		               return flask.jsonify(material=qr_result[0], diameter=qr_result[1], color=qr_result[2], length=qr_result[3],
-								 muid=qr_result[4])
+                               return_result = {'material': qr_result[0],
+                                                'diameter': qr_result[1],
+                                                'color': qr_result[2],
+                                                'length': qr_result[3],
+                                                'muid': qr_result[4]}
+		               return flask.jsonify(result=return_result)
 		       else:
 		               return flask.jsonify(error="Invalid QR code") 
 

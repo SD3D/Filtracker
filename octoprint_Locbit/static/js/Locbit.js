@@ -21,12 +21,12 @@ $(function() {
                 success: function(data) {
                     // $('#material').html(data);
                   if (data.hasOwnProperty('result')){
-                    if (Object.keys(data).length == 5) {
-                        $('#material').html(data.material);
-                        $('#diameter').html(data.diameter);
-                        $('#color').html(data.color);
-                        $('#length').html(data.length);
-                        $('#muid').html(data.muid);
+                    if (Object.keys(data.result).length == 5) {
+                        $('#material').html(data.result.material);
+                        $('#diameter').html(data.result.diameter);
+                        $('#color').html(data.result.color);
+                        $('#length').html(data.result.length);
+                        $('#muid').html(data.result.muid);
                         
                         $('#qr-btn').prop('disabled', false);
                     }
