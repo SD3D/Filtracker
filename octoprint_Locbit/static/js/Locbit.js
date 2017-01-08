@@ -40,7 +40,7 @@ $(function() {
                      $('#qr-btn').prop('disabled', false);
                      alert("Error: " + data.error);
                 }
-        });
+        }});
         }
 
         self.onStartup = function() {
