@@ -44,12 +44,12 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                 json_output = json.loads(output)
                 
                 if 'error' in json_output:
-                       return "Invalid QR code"
+                       return flask.jsonify(error=json_output['error']) 
                 else:
                        qr_result = json_output.get('result')
                        
                        if qr_result is None:
-                               return "Invalid QR code"
+                               return flask.jsonify(error="QR code read failure. Uknown error.") 
                        
                        qr_result = qr_result.split(",")
  
@@ -57,7 +57,7 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
 		               return flask.jsonify(material=qr_result[0], diameter=qr_result[1], color=qr_result[2], length=qr_result[3],
 								 muid=qr_result[4])
 		       else:
-		               return "Invalid QR code"
+		               return flask.jsonify(error="Invalid QR code") 
 
 	def on_after_startup(self):
 		self._logger.info("Hello world! I am: %s" % self._settings.get(["did"]))
