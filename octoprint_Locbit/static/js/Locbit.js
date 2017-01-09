@@ -11,6 +11,15 @@ $(function() {
         var filesState = parameters[2];
         var self = this;
 
+
+        function setQRData(qr_data){
+            $('#material').html(qr_data.material);
+            $('#diameter').html(qr_data.diameter);
+            $('#color').html(qr_data.color);
+            $('#length').html(qr_data.length);
+            $('#muid').html(qr_data.muid);
+        }
+
         function apiFetch() {
 
             $('#qr-btn').prop('disabled', true);
@@ -21,23 +30,53 @@ $(function() {
                 success: function(data) {
                     // $('#material').html(data);
                   if (data.hasOwnProperty('result')){
+                    //alert(Object.keys(data.result).length)
                     if (Object.keys(data.result).length == 5) {
-                        $('#material').html(data.result.material);
-                        $('#diameter').html(data.result.diameter);
-                        $('#color').html(data.result.color);
-                        $('#length').html(data.result.length);
-                        $('#muid').html(data.result.muid);
+                                                
+                        setQRData(data.result);
+
+                        if (data.hasOwnProperty('locbit_error')){
+                            alert("WARNING - remote locbit connection error: " + data.locbit_error);
+                        }
                         
-                        $('#qr-btn').prop('disabled', false);
                     }
                     else {
-                        $('#qr-btn').prop('disabled', false);
+                        
                         alert('Invalid QR code. Please scan again.')
                     }
+ 
+                    $('#qr-btn').prop('disabled', false);
 
                 }
                 else if (data.hasOwnProperty('error')){
                      $('#qr-btn').prop('disabled', false);
+                     alert("Error: " + data.error);
+                }
+        }});
+        }
+
+        function getQRSettings(){
+
+           $.ajax({
+                type: "GET",
+                url: "/api/plugin/Locbit?settings=1",
+                success: function(data) {
+                    // $('#material').html(data);
+                  if (data.hasOwnProperty('result')){
+                    //alert(Object.keys(data.result).length)
+                    if (Object.keys(data.result).length == 5) {
+
+                        setQRData(data.result);
+
+                    }
+                    else {
+
+                        alert('Settings error, invalid format.')
+                    }
+                    
+                }
+                else if (data.hasOwnProperty('error')){
+                     
                      alert("Error: " + data.error);
                 }
         }});
@@ -67,7 +106,8 @@ $(function() {
             $( "#qr-btn" ).bind( "click", function() {
                 apiFetch();
             });
-
+     
+            getQRSettings();
 
         };
 

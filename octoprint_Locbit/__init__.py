@@ -11,7 +11,8 @@ import json
 Layer = 0
 uid = "55de667a295efb62093205e4"
 # url = "http://192.168.0.34:3000"
-url = "http://api.locbit.com:8888/endpoint"
+#url = "http://api.locbit.com:8888/endpoint"
+url = "https://test-api.locbit.com/endpoint"
 
 class LocbitPlugin(octoprint.plugin.StartupPlugin,
 			octoprint.plugin.TemplatePlugin,
@@ -38,6 +39,16 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
 			self._logger.info("command2 called, some_parameter is {some_parameter}".format(**data))
 
 	def on_api_get(self, request):
+                
+                if request.args.get('settings') == '1':
+                        
+                        return_result = {}                 
+                        
+                        for qr_data_key in ['material', 'diameter', 'color', 'length', 'muid']:
+                                return_result[qr_data_key] = self._settings.get([qr_data_key])
+                        
+                        return flask.jsonify(result=return_result)
+                
 		import subprocess
 		output = subprocess.check_output(['/home/pi/oprint/lib/python2.7/site-packages'
 										  '/octoprint_Locbit/qr.py'])
@@ -59,6 +70,29 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                                                 'color': qr_result[2],
                                                 'length': qr_result[3],
                                                 'muid': qr_result[4]}
+
+                               octoprint.plugin.SettingsPlugin.on_settings_save(self, return_result)
+
+                               try:
+                                       post_data = {"MUID":return_result['muid'],
+                                                    "Material":return_result['material'],
+                                                    "Color":return_result['color'],
+                                                    "Diameter":return_result['diameter'],
+                                                    "Length":return_result['length']}
+
+                                       post_result = requests.post(url, json=post_data, timeout=5)
+                                       
+                                       post_result.raise_for_status()
+
+                                       post_result_data = post_result.json()
+
+                                       if not post_result_data['success']:
+                                               raise Exception("Post data: {}, response data: {}".format(str(post_data), str(post_result_data)))
+
+ 
+                               except Exception as e:
+                                       return flask.jsonify(result=return_result, locbit_error=str(e))
+
 		               return flask.jsonify(result=return_result)
 		       else:
 		               return flask.jsonify(error="Invalid QR code") 
@@ -67,7 +101,12 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
 		self._logger.info("Hello world! I am: %s" % self._settings.get(["did"]))
 
 	def get_settings_defaults(self):
-		return dict(did="TEST_PRINTER")
+		return dict(did="TEST_PRINTER",
+                            material='',
+                            diameter='',
+                            color='',
+                            length='',
+                            muid='')
 
 	def get_template_configs(self):
 		return [
