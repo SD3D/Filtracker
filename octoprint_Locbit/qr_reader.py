@@ -1,16 +1,23 @@
 from SimpleCV import Color, Camera, Display, JpegStreamCamera
 import time
 import timeout_decorator
+import sys
 
 TIMEOUT_SECONDS = 15
 
 @timeout_decorator.timeout(TIMEOUT_SECONDS)
-def scan():
+def scan(horizontal_flip=False):
     jc = JpegStreamCamera("http://octopi.local/webcam/?action=stream")
     qrcode = []
+    
     while(not qrcode):
         img_og = jc.getImage() #gets image from the camera
+
         img = img_og
+
+        if horizontal_flip:
+            img = img_og.flipHorizontal()
+
         qrcode = img.findBarcode() #finds qr data from image
 
         if(qrcode is not None): #if there is some data processed
