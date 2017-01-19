@@ -152,6 +152,7 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                         for qr_data_key in ['material', 'diameter', 'color', 'length', 'muid']:
                                 return_result[qr_data_key] = self._settings.get([qr_data_key])
                         
+                        return_result['length'] = "{0:.3f}".format(float(return_result['length'])) 
                         return flask.jsonify(result=return_result)
                 
 		import subprocess
@@ -206,6 +207,8 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
 
                                except Exception as e:
                                        return flask.jsonify(result=return_result, locbit_error=str(e))
+
+                               return_result['length'] = "{0:.3f}".format(float(return_result['length'])) 
 
 		               return flask.jsonify(result=return_result)
 		       else:

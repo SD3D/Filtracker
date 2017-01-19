@@ -82,6 +82,10 @@ $(function() {
         }});
         }
 
+        function QRSettingsWrap(payload){
+            return getQRSettings();
+        }
+
         self.onStartup = function() {
             var element = $("#state").find(".accordion-inner .progress");
             if (element.length) {
@@ -96,6 +100,14 @@ $(function() {
                 element.before(text3 + ": <strong id='length'></strong><br>");
                 element.before(text4 + ": <strong id='muid'></strong><br>");
             }
+
+         self.onEventZChange = getQRSettings;
+         self.onEventPrintStarted = QRSettingsWrap;
+         self.onEventPrintFailed = QRSettingsWrap;
+         self.onEventPrintDone = QRSettingsWrap;
+         self.onEventPrintCancelled = QRSettingsWrap;
+         self.onEventPrintPaused = self.updateSettings;
+         self.onPrintResumed = self.updateSettings;
 
             var code = '<div class="jog-panel"> <!-- QR Code control panel --> <div class="jog-panel" id="scan-qr-code"> <h1>QR Code</h1><div> <button class="btn btn-block control-box" id="qr-btn" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { } ">Scan QR</button></div></div></div>';
 
