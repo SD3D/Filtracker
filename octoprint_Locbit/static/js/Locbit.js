@@ -57,33 +57,79 @@ $(function() {
 
         function getQRSettings(){
 
-           $.ajax({
-                type: "GET",
-                url: "/api/plugin/Locbit?settings=1",
-                success: function(data) {
-                    // $('#material').html(data);
-                  if (data.hasOwnProperty('result')){
-                    //alert(Object.keys(data.result).length)
-                    if (Object.keys(data.result).length == 5) {
+           return $.ajax({
+                          type: "GET",
+                          async: false,
+                          url: "/api/plugin/Locbit?settings=1",
+                          success: function(data) {
+                          // $('#material').html(data);
+                          if (data.hasOwnProperty('result')){
+                          //alert(Object.keys(data.result).length)
+                          if (Object.keys(data.result).length == 5) {
+                          //console.log(data.result);
+                          setQRData(data.result);
+                       
+                          return data;
 
-                        setQRData(data.result);
+                         }
+                         else {
 
-                    }
-                    else {
-
-                        alert('Settings error, invalid format.')
-                    }
+                              alert('Settings error, invalid format.')
+                        }
                     
-                }
-                else if (data.hasOwnProperty('error')){
+                       }
+                       else if (data.hasOwnProperty('error')){
                      
-                     alert("Error: " + data.error);
-                }
+                              alert("Error: " + data.error);
+                      }
+
+                      return undefined;
         }});
         }
 
         function QRSettingsWrap(payload){
             return getQRSettings();
+        }
+
+        function evaluatePrintLength(file){
+            estimated_length = file["gcodeAnalysis"]["filament"]["tool0"]["length"];
+            
+            if(!estimated_length){
+                alert("Estimated length unknown, must click 'Print' to override");
+                return false;
+            }
+
+            qr_data_obj = getQRSettings().responseJSON.result;
+
+            if((qr_data_obj === undefined) || (qr_data_obj === null)){
+                alert("Remaining length unknown, must click 'Print' to override");
+                return false;
+                
+            }
+
+            remaining_length_float = parseFloat(qr_data_obj.length);
+            estimated_length_float = parseFloat(estimated_length);
+
+            if(remaining_length_float < (estimated_length_float / 1000)){
+                alert("Remaining length is less than estimated length, must click 'Print' to override")
+                return false;
+            }
+
+            return true;
+        }
+
+
+        function locbitLoadFile(file, printAfterLoad){
+            
+            if (!file) {
+                return;
+            }
+            var withinPrintDimensions = filesState.evaluatePrintDimensions(file, true);
+            var adequateLength = evaluatePrintLength(file);
+            var print = printAfterLoad && withinPrintDimensions && adequateLength;
+
+            OctoPrint.files.select(file.origin, file.path, print);
+
         }
 
         self.onStartup = function() {
@@ -99,6 +145,9 @@ $(function() {
                 element.before(text2 + ": <strong id='color'></strong><br>");
                 element.before(text3 + ": <strong id='length'></strong><br>");
                 element.before(text4 + ": <strong id='muid'></strong><br>");
+
+                filesState.loadFile = locbitLoadFile;
+                
             }
 
          self.onEventZChange = getQRSettings;
