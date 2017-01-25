@@ -86,16 +86,13 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
 
         def _get_spool_settings(self):
 
-                setting_keys = ['muid', 'material', 'color', 'diameter', 'length', 'initial_length']
+                setting_keys = ['muid', 'material', 'color', 'diameter', 'length', 'initial_length', 'jobProgress']
 
                 setting_dict = {}
 
                 for setting_key in setting_keys:
 
                         setting_value = self._settings.get([setting_key])
-
-                        if setting_value is None or len(setting_value) == 0:
-                                raise Exception("Setting {} is not set".format(setting_key))
 
                         setting_dict[setting_key] = setting_value
 
@@ -139,9 +136,19 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                         progress_obj = printer_job_info.get('progress')
 
                         if progress_obj is not None:
-                                job_completion_percent = progress_obj['completion'] 
+                                job_completion_percent = progress_obj['completion']
+
+                        internal_progress = current_spool_settings.get('jobProgress')
+
+                        if internal_progress != '':
+                                internal_progress = float(internal_progress) 
 
                         if job_completion_percent is not None:
+                                
+                                # If a job reset has been detected, set initial length to length
+                                if internal_progress != '' and internal_progress > job_completion_percent:
+                                        initial_length = float(current_spool_settings['length'])
+					current_spool_settings['initial_length'] = str(current_spool_settings['length'])   
 
                                 # Job filament length is in millimeters, so must convert to meters
                                 length_job_used = (job_completion_percent / 100) * (estimated_job_length / 1000)
@@ -150,12 +157,20 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
 
                                 current_spool_settings['length'] = new_length
 
-                                if update_remote:
-                                        self._post_spool_data(current_spool_settings)
-
                                 current_spool_settings['length'] = str(current_spool_settings['length'])
+ 
+                                current_spool_settings['jobProgress'] = job_completion_percent
 
                                 octoprint.plugin.SettingsPlugin.on_settings_save(self, current_spool_settings)
+                        # If a job reset has been detected, set initial length to length
+                        elif job_completion_percent is None and internal_progress != '':
+                                current_spool_settings['initial_length'] = str(current_spool_settings['length'])
+                                current_spool_settings['jobProgress'] = ''
+                                octoprint.plugin.SettingsPlugin.on_settings_save(self, current_spool_settings)
+
+                        if update_remote:
+                                current_spool_settings['length'] = float(current_spool_settings['length'])
+                                self._post_spool_data(current_spool_settings)
                 except Exception as e:
                         self._logger.error("Could not update length: {}".format(str(e)))
 
@@ -218,6 +233,7 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                                                return_result['length'] = stored_length
                                                octoprint.plugin.SettingsPlugin.on_settings_save(self, return_result)
                                                octoprint.plugin.SettingsPlugin.on_settings_save(self, {'initial_length': return_result['length']})
+                                               octoprint.plugin.SettingsPlugin.on_settings_save(self, {'printProgress': ''})
                                        else:
                                                self._post_spool_data(return_result)
 
@@ -266,29 +282,17 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
 		if event == "PrintStarted":
 			Layer = 0
 			self.sendLayerStatus(Layer)
-                        current_spool_settings = self._get_spool_settings()
-                        current_spool_settings['initial_length'] = current_spool_settings['length']
-                        octoprint.plugin.SettingsPlugin.on_settings_save(self, current_spool_settings)
                         self._update_spool_length(update_remote=True)
-                        print('^' * 20 + current_spool_settings['initial_length'])
 		elif event == "PrintFailed":
 			Layer = 0
 			self.sendLayerStatus(Layer)
-                        current_spool_settings = self._get_spool_settings()
-                        current_spool_settings['initial_length'] = current_spool_settings['length']
-                        octoprint.plugin.SettingsPlugin.on_settings_save(self, current_spool_settings)
+                        self._update_spool_length(update_remote=True)
 		elif event == "PrintCancelled":
 			Layer = 0
 			self.sendLayerStatus(Layer)
-                        current_spool_settings = self._get_spool_settings()
-                        current_spool_settings['initial_length'] = current_spool_settings['length']
-                        octoprint.plugin.SettingsPlugin.on_settings_save(self, current_spool_settings)
-                        print('&' * 30) 
+                        self._update_spool_length(update_remote=True)
                 elif event == "PrintDone":
-                        current_spool_settings = self._get_spool_settings()
-                        current_spool_settings['initial_length'] = current_spool_settings['length']
-                        octoprint.plugin.SettingsPlugin.on_settings_save(self, current_spool_settings)
-                        pass
+                        self._update_spool_length(update_remote=True) 
                 elif event == "PrintPaused":
                         self._update_spool_length(update_remote=True)
                         
