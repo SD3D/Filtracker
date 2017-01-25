@@ -243,7 +243,8 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                             muid='',
                             locbitAPIKey='',
                             locbitAccessID='',
-                            camFlipHorizontal=False)
+                            camFlipHorizontal=False,
+                            jobProgress='')
 
 	def get_template_configs(self):
 		return [
