@@ -3,6 +3,9 @@ from httplib import BadStatusLine
 from .locbitNotifications import locbitMsgDict
 
 import octoprint.plugin
+from octoprint.slicing import SlicingManager, UnknownProfile
+from octoprint.server import printerProfileManager
+from octoprint.settings import settings
 import requests
 import flask
 import json
@@ -174,6 +177,15 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                 except Exception as e:
                         self._logger.error("Could not update length: {}".format(str(e)))
 
+        def _set_default_slice_profile(self, muid_prefix):
+                slice_profile_path = settings().get(['folder', 'slicingProfiles'])
+                
+                slice_manager = SlicingManager(slice_profile_path, printerProfileManager)
+                slice_manager.reload_slicers()
+                default_slicer = slice_manager.default_slicer
+                slice_manager.set_default_profile(default_slicer, muid_prefix, require_exists=True)
+                
+
 	def on_api_get(self, request):
                 
                 if request.args.get('settings') == '1':
@@ -239,6 +251,11 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
 
                                except Exception as e:
                                        return flask.jsonify(result=return_result, locbit_error=str(e))
+
+                               try:
+                                       self._set_default_slice_profile(return_result['muid'][0:7])
+                               except Exception as e:
+                                       return flask.jsonify(result=return_result, locbit_error="Setting profile {} as default failed, check to see if it exists".format(return_result['muid']))
 
                                return_result['length'] = "{0:.3f}".format(float(return_result['length'])) 
 
