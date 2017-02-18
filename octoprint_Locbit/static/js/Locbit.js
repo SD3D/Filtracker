@@ -38,6 +38,12 @@ $(function() {
                         if (data.hasOwnProperty('locbit_error')){
                             alert("WARNING - remote locbit connection error: " + data.locbit_error);
                         }
+                        else{
+                            new PNotify({
+                                         title: 'QR code scanned',
+                                         text: 'QR code has been scanned'
+                                       });
+                        }
                         
                     }
                     else {
