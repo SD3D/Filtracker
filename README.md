@@ -16,5 +16,15 @@ Requires the following ssh commands to work
     sudo apt-get install python-zbar
     chmod +x ~/oprint/lib/python2.7/site-packages/octoprint_Locbit/qr.py
 
+Must add these directives to the configuration file /home/pi/.octoprint/config.yaml (top level directives folder and slicing might already exist):
+
+```
+folder:
+  slicingProfiles: /home/pi/.octoprint/slicingProfiles
+
+slicing:
+  defaultSlicer: cura 
+```
+
 Then restart OctoPrint
 
