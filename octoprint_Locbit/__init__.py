@@ -10,6 +10,9 @@ import requests
 import flask
 import json
 import hashlib
+import os
+from shutil import copyfile
+import urllib
 
 Layer = 0
 uid = "55de667a295efb62093205e4"
@@ -135,6 +138,19 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
 
                 print('1' * 40 + str(json_response))
                 return json_response['profiles'][printer_profile_id]
+
+        def _get_local_file_metadata(self, local_file_name):
+                local_file_uri = "http://localhost/api/files/local/{}".format(urllib.quote_plus(local_file_name))
+                print('B' * 40 + local_file_uri)
+                octoprint_api_key = self._settings.get(["apiKey"])
+
+                assert octoprint_api_key is not None and len(octoprint_api_key) > 0
+
+                response = requests.get(local_file_uri,  headers = { "X-Api-Key" : octoprint_api_key }, timeout=5)
+                response.raise_for_status()
+                json_response = response.json()
+
+                return json_response
 
         def _update_spool_length(self, update_remote=False):
 
@@ -330,18 +346,46 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
 
                                 def patched_callback(*callbackargs, **callbackkwargs):
                                         
-                                        md5 = hashlib.md5()
-                                        with open(args[3], 'rb') as f:
-                                                for chunk in iter(lambda: f.read(8192), b''):
-                                                        md5.update(chunk)
+                                        #md5 = hashlib.md5()
+                                        #with open(args[3], 'rb') as f:
+                                        #        for chunk in iter(lambda: f.read(8192), b''):
+                                        #                md5.update(chunk)
                                         #print('Q' * 40 + md5.hexdigest())
 
-                                        self._associate_profile_gcode(md5.hexdigest(), args[1], args[4], kwargs['printer_profile_id'])
+                                        
+                                        #copyfile(args[3], '/home/pi/gcode.txt')
+
+                                        #hasher = hashlib.sha1()
+                                        #with open(args[3], 'rb') as f:
+                                         #       while True:
+                                         #               data = f.read(4096)
+                                         #               if not data:
+                                         #                       break
+                                         #               hasher.update(data)
+
+                                        #print('I' * 40 + str(os.path.getsize(args[3])))
+
+                                        #self._associate_profile_gcode(hasher.hexdigest(), args[1], args[4], kwargs['printer_profile_id'])
 
                                         if 'callback_args' in kwargs and 'callback_kwargs' in kwargs:
                                                 original_callback(*kwargs['callback_args'], **kwargs['callback_kwargs'])
                                         elif 'callback_args' in kwargs and 'callback_kwargs' not in kwargs:
+
+                                                gco_file = None
+
+                                                for arg in kwargs['callback_args']:
+                                                        if arg.endswith('gco') and arg != args[3]:
+                                                                gco_file = arg
+                                                                break
+
                                                 original_callback(*kwargs['callback_args'])
+
+                                                if gco_file is not None:
+                                                        gco_hash = self._get_local_file_metadata(gco_file)['hash']
+
+                                                        self._associate_profile_gcode(gco_hash, args[1], args[4], kwargs['printer_profile_id'])
+                                                
+                                                
                                         elif 'callback_args' not in kwargs and 'callback_kwargs' in kwargs:
                                                 original_callback(*kwargs['callback_kwargs'])
                                         elif 'callback_args' not in kwargs and 'callback_kwargs' not in kwargs:
