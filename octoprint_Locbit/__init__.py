@@ -9,7 +9,7 @@ from octoprint.settings import settings
 import requests
 import flask
 import json
-
+import hashlib
 
 Layer = 0
 uid = "55de667a295efb62093205e4"
@@ -111,6 +111,30 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                 response.raise_for_status()
 
                 return response.json()
+
+        def _get_slice_profile(self, slicer, slice_profile_name):
+                profile_uri = "http://localhost/api/slicing/{}/profiles/{}".format(slicer, slice_profile_name)
+                octoprint_api_key = self._settings.get(["apiKey"])
+
+                assert octoprint_api_key is not None and len(octoprint_api_key) > 0
+
+                response = requests.get(profile_uri,  headers = { "X-Api-Key" : octoprint_api_key }, timeout=5)
+                response.raise_for_status()
+
+                return response.json()
+
+        def _get_printer_profile(self, printer_profile_id):
+                profile_uri = "http://localhost/api/printerprofiles"
+                octoprint_api_key = self._settings.get(["apiKey"])
+
+                assert octoprint_api_key is not None and len(octoprint_api_key) > 0
+
+                response = requests.get(profile_uri,  headers = { "X-Api-Key" : octoprint_api_key }, timeout=5)
+                response.raise_for_status()
+                json_response = response.json()
+
+                print('1' * 40 + str(json_response))
+                return json_response['profiles'][printer_profile_id]
 
         def _update_spool_length(self, update_remote=False):
 
@@ -261,10 +285,76 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
 
 		               return flask.jsonify(result=return_result)
 		       else:
-		               return flask.jsonify(error="Invalid QR code") 
+		               return flask.jsonify(error="Invalid QR code")
+
+                
+
+        def _associate_profile_gcode(self, gcode_identifier, slicer, slicing_profile_name, printer_profile_id):
+
+                slicing_profile = self._get_slice_profile(slicer, slicing_profile_name)
+                printer_profile = self._get_printer_profile(printer_profile_id)
+
+                print('J' * 40 + str(printer_profile))
+
+                request_data = json.dumps({'muid': self._settings.get(['muid'])[0:7], 'gcode_identifier': gcode_identifier, 
+                                           'slicing_profile': slicing_profile, 'printer_make': printer_profile_id,
+                                           'printer_model': printer_profile['model'], 'nozzle_size': printer_profile['extruder']['nozzleDiameter'], 'layer_height': 1})
+ 
+                print('Y' * 40 + str(request_data))
+
+                locbit_info_share_uri = 'https://sd3d.locbit.com/profile'
+
+                locbit_api_key = self._settings.get(['locbitAPIKey'])
+                locbit_access_id = self._settings.get(['locbitAccessID'])
+
+                if len(locbit_api_key) == 0 or len(locbit_access_id) == 0:
+                        return
+
+                query_params = {'api': locbit_api_key, 'access': locbit_access_id}
+
+                response = requests.post(locbit_info_share_uri, params=query_params, headers={'Content-Type': 'application/json'}, data=request_data).json()
+
+                print('P' * 40 + str(response))
+                
+                 
 
 	def on_after_startup(self):
 		self._logger.info("Hello world! I am: %s" % self._settings.get(["did"]))
+                
+                def slice_monkey_patch_gen(slice_func):
+                        def slice_monkey_patch(*args, **kwargs):
+
+                                original_callback = args[5]
+                                print('N' * 40 + str(args))
+                                print('O' * 40 + str(kwargs))
+
+                                def patched_callback(*callbackargs, **callbackkwargs):
+                                        
+                                        md5 = hashlib.md5()
+                                        with open(args[3], 'rb') as f:
+                                                for chunk in iter(lambda: f.read(8192), b''):
+                                                        md5.update(chunk)
+                                        #print('Q' * 40 + md5.hexdigest())
+
+                                        self._associate_profile_gcode(md5.hexdigest(), args[1], args[4], kwargs['printer_profile_id'])
+
+                                        if 'callback_args' in kwargs and 'callback_kwargs' in kwargs:
+                                                original_callback(*kwargs['callback_args'], **kwargs['callback_kwargs'])
+                                        elif 'callback_args' in kwargs and 'callback_kwargs' not in kwargs:
+                                                original_callback(*kwargs['callback_args'])
+                                        elif 'callback_args' not in kwargs and 'callback_kwargs' in kwargs:
+                                                original_callback(*kwargs['callback_kwargs'])
+                                        elif 'callback_args' not in kwargs and 'callback_kwargs' not in kwargs:
+                                                original_callback() 
+                               
+                                arg_list = list(args)
+                                arg_list[5] = patched_callback
+                                args = tuple(arg_list)
+                                slice_func(*args, **kwargs)
+
+                        return slice_monkey_patch
+
+                octoprint.slicing.SlicingManager.slice = slice_monkey_patch_gen(octoprint.slicing.SlicingManager.slice)
 
 	def get_settings_defaults(self):
 		return dict(did="TEST_PRINTER",
