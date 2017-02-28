@@ -136,12 +136,24 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                 response.raise_for_status()
                 json_response = response.json()
 
-                print('1' * 40 + str(json_response))
                 return json_response['profiles'][printer_profile_id]
+
+        def _get_current_printer_profile(self):
+                profile_uri = "http://localhost/api/printerprofiles"
+                octoprint_api_key = self._settings.get(["apiKey"])
+
+                assert octoprint_api_key is not None and len(octoprint_api_key) > 0
+
+                response = requests.get(profile_uri,  headers = { "X-Api-Key" : octoprint_api_key }, timeout=5)
+                response.raise_for_status()
+                printers = response.json()['profiles']
+
+                for printer in printers:
+                        if printers[printer]['current']:
+                                return printers[printer]
 
         def _get_local_file_metadata(self, local_file_name):
                 local_file_uri = "http://localhost/api/files/local/{}".format(urllib.quote_plus(local_file_name))
-                print('B' * 40 + local_file_uri)
                 octoprint_api_key = self._settings.get(["apiKey"])
 
                 assert octoprint_api_key is not None and len(octoprint_api_key) > 0
@@ -151,6 +163,18 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                 json_response = response.json()
 
                 return json_response
+
+        def _get_current_job(self):
+                job_uri = "http://localhost/api/job"
+                octoprint_api_key = self._settings.get(["apiKey"])
+
+                assert octoprint_api_key is not None and len(octoprint_api_key) > 0
+
+                response = requests.get(job_uri,  headers = { "X-Api-Key" : octoprint_api_key }, timeout=5)
+                response.raise_for_status()
+                job = response.json()
+
+                return job
 
         def _update_spool_length(self, update_remote=False):
 
@@ -303,20 +327,84 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
 		       else:
 		               return flask.jsonify(error="Invalid QR code")
 
+        def _update_profile_event_stats(self, printer_event):
+
+                sharing_mode = self._settings.get(['sharingMode'])
                 
+                if not sharing_mode:
+                        self._logger.info('Sharing Mode turned off, skipping profile stat update')
+                        return
+
+                current_printer = self._get_current_printer_profile()
+
+                printer_make = current_printer['id']
+                printer_model = current_printer['model']
+                nozzle_size = current_printer['extruder']['nozzleDiameter']
+
+                muid = self._settings.get(['muid'])[0:7]
+
+                current_job = self._get_current_job()
+
+                gcode_file_name = current_job['job']['file']['name']
+                gcode_file_metadata = self._get_local_file_metadata(gcode_file_name)
+                gcode_identifier = gcode_file_metadata['hash']
+
+                layer_height = None
+                
+                try:
+                        layer_height = int( self._settings.get(['layerHeight']) )
+                        assert layer_height > 0
+                except Exception as e:
+                        self._logger.error('Cannot make profile stat request, layer height must be non-zero positive integer')
+                        return
+
+                profile_update_data =json.dumps( {
+                                                  'printer_event': printer_event, 
+                                                  'muid': muid,
+                                                  'gcode_identifier': gcode_identifier,
+                                                  'printer_make': printer_make,
+                                                  'printer_model': printer_model,
+                                                  'nozzle_size': nozzle_size, 
+                                                  'layer_height': layer_height
+                                                 }
+                                               )  
+                
+                self._logger.info('UPDATE' * 5 + str(profile_update_data))
+                
+                locbit_info_share_event_uri = 'https://sd3d.locbit.com/event' 
+
+                locbit_api_key = self._settings.get(['locbitAPIKey'])
+                locbit_access_id = self._settings.get(['locbitAccessID'])
+
+                if len(locbit_api_key) == 0 or len(locbit_access_id) == 0:
+                        self._logger.error("No API key or access key in settings. Skipping stat update")
+                        return
+
+                query_params = {'api': locbit_api_key, 'access': locbit_access_id}
+
+                response = requests.post(locbit_info_share_event_uri, params=query_params, headers={'Content-Type': 'application/json'}, data=profile_update_data).json()
+
+                self._logger.info('EVENT STAT RESPONSE' * 3 + str(response)) 
 
         def _associate_profile_gcode(self, gcode_identifier, slicer, slicing_profile_name, printer_profile_id):
 
                 slicing_profile = self._get_slice_profile(slicer, slicing_profile_name)
                 printer_profile = self._get_printer_profile(printer_profile_id)
 
-                print('J' * 40 + str(printer_profile))
+                layer_height = None
+
+                try:
+                        layer_height = int( self._settings.get(['layerHeight']) )
+                        assert layer_height > 0
+                except Exception as e:
+                        self._logger.error('Cannot make gcode association request, layer height must be non-zero positive integer')
+                        return
 
                 request_data = json.dumps({'muid': self._settings.get(['muid'])[0:7], 'gcode_identifier': gcode_identifier, 
                                            'slicing_profile': slicing_profile, 'printer_make': printer_profile_id,
-                                           'printer_model': printer_profile['model'], 'nozzle_size': printer_profile['extruder']['nozzleDiameter'], 'layer_height': 1})
+                                           'printer_model': printer_profile['model'], 'nozzle_size': printer_profile['extruder']['nozzleDiameter'], 'layer_height': layer_height})
  
-                print('Y' * 40 + str(request_data))
+                self._logger.info('PROFILE ASSOCIATION REQUEST' * 3 + str(request_data))
 
                 locbit_info_share_uri = 'https://sd3d.locbit.com/profile'
 
@@ -324,13 +412,14 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                 locbit_access_id = self._settings.get(['locbitAccessID'])
 
                 if len(locbit_api_key) == 0 or len(locbit_access_id) == 0:
+                        self._logger.error("No API key or access key in settings. Skipping profile update")
                         return
 
                 query_params = {'api': locbit_api_key, 'access': locbit_access_id}
 
                 response = requests.post(locbit_info_share_uri, params=query_params, headers={'Content-Type': 'application/json'}, data=request_data).json()
 
-                print('P' * 40 + str(response))
+                self._logger.info('PROFILE ASSOCIATION RESPONSE' * 3 + str(response))
                 
                  
 
@@ -341,31 +430,8 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                         def slice_monkey_patch(*args, **kwargs):
 
                                 original_callback = args[5]
-                                print('N' * 40 + str(args))
-                                print('O' * 40 + str(kwargs))
 
                                 def patched_callback(*callbackargs, **callbackkwargs):
-                                        
-                                        #md5 = hashlib.md5()
-                                        #with open(args[3], 'rb') as f:
-                                        #        for chunk in iter(lambda: f.read(8192), b''):
-                                        #                md5.update(chunk)
-                                        #print('Q' * 40 + md5.hexdigest())
-
-                                        
-                                        #copyfile(args[3], '/home/pi/gcode.txt')
-
-                                        #hasher = hashlib.sha1()
-                                        #with open(args[3], 'rb') as f:
-                                         #       while True:
-                                         #               data = f.read(4096)
-                                         #               if not data:
-                                         #                       break
-                                         #               hasher.update(data)
-
-                                        #print('I' * 40 + str(os.path.getsize(args[3])))
-
-                                        #self._associate_profile_gcode(hasher.hexdigest(), args[1], args[4], kwargs['printer_profile_id'])
 
                                         if 'callback_args' in kwargs and 'callback_kwargs' in kwargs:
                                                 original_callback(*kwargs['callback_args'], **kwargs['callback_kwargs'])
@@ -390,10 +456,14 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                                                 original_callback(*kwargs['callback_kwargs'])
                                         elif 'callback_args' not in kwargs and 'callback_kwargs' not in kwargs:
                                                 original_callback() 
-                               
-                                arg_list = list(args)
-                                arg_list[5] = patched_callback
-                                args = tuple(arg_list)
+                              
+                                sharing_mode = self._settings.get(['sharingMode']) 
+                                
+                                if sharing_mode:
+                                        arg_list = list(args)
+                                        arg_list[5] = patched_callback
+                                        args = tuple(arg_list)
+                                
                                 slice_func(*args, **kwargs)
 
                         return slice_monkey_patch
@@ -411,7 +481,9 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                             locbitAPIKey='',
                             locbitAccessID='',
                             camFlipHorizontal=False,
-                            jobProgress='')
+                            jobProgress='',
+                            layerHeight='',
+                            sharingMode=False)
 
 	def get_template_configs(self):
 		return [
@@ -434,18 +506,25 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
 			Layer = 0
 			self.sendLayerStatus(Layer)
                         self._update_spool_length(update_remote=True)
+                        self._update_profile_event_stats(event) 
 		elif event == "PrintFailed":
 			Layer = 0
 			self.sendLayerStatus(Layer)
                         self._update_spool_length(update_remote=True)
+                        self._update_profile_event_stats(event)
 		elif event == "PrintCancelled":
 			Layer = 0
 			self.sendLayerStatus(Layer)
                         self._update_spool_length(update_remote=True)
+                        self._update_profile_event_stats(event)
                 elif event == "PrintDone":
-                        self._update_spool_length(update_remote=True) 
+                        self._update_spool_length(update_remote=True)
+                        self._update_profile_event_stats(event) 
                 elif event == "PrintPaused":
                         self._update_spool_length(update_remote=True)
+                        self._update_profile_event_stats(event)
+                elif event == "PrintResumed":
+                        self._update_profile_event_stats(event)
                         
 		if event in locbitMsgDict:
 			event_body = {

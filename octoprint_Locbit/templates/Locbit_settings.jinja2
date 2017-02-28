@@ -16,10 +16,21 @@
         <div class="controls">
             <input type="text" class="input-block-level" data-bind="value: settings.plugins.Locbit.locbitAccessID">
         </div>
+        <label class="control-label">{{ _('Layer Height in μm') }}</label>
+        <div class="controls">
+            <input type="text" class="input-block-level" data-bind="value: settings.plugins.Locbit.layerHeight">
+        </div>
         <div class="control-group">
             <div class="controls">
                 <label class="checkbox">
                     <input type="checkbox" data-bind="checked: settings.plugins.Locbit.camFlipHorizontal"> {{ _('Enable camera horizontal image flip, so QR code data can be read') }}
+                </label>
+            </div>
+        </div>
+        <div class="control-group">
+            <div class="controls">
+                <label class="checkbox">
+                    <input type="checkbox" data-bind="checked: settings.plugins.Locbit.sharingMode"> {{ _('Enable information sharing with Locbit (Sharing Mode)') }}
                 </label>
             </div>
         </div>
