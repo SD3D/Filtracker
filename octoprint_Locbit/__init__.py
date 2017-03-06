@@ -8,11 +8,13 @@ from octoprint.server import printerProfileManager
 from octoprint.settings import settings
 import requests
 import flask
+from flask import request
 import json
 import hashlib
 import os
 from shutil import copyfile
 import urllib
+from urlparse import urlsplit
 
 Layer = 0
 uid = "55de667a295efb62093205e4"
@@ -20,6 +22,8 @@ uid = "55de667a295efb62093205e4"
 #url = "http://api.locbit.com:8888/endpoint"
 url = "https://test-api.locbit.com/endpoint"
 status_url = 'https://test-api.locbit.com/statusByLid'
+
+HTTP_REQUEST_TIMEOUT=30
 
 class LocbitPlugin(octoprint.plugin.StartupPlugin,
 			octoprint.plugin.TemplatePlugin,
@@ -53,7 +57,7 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                              "Diameter":spool_data['diameter'],
                              "Length":spool_data['length']}
 
-                post_result = requests.post(url, json=post_data, timeout=5)
+                post_result = requests.post(url, json=post_data, timeout=HTTP_REQUEST_TIMEOUT)
 
                 post_result.raise_for_status()
 
@@ -74,7 +78,7 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
 
                 query_params = {'api': locbit_api_key, 'access': locbit_access_id} 
 
-                response = requests.get(request_uri, params=query_params, timeout=5)
+                response = requests.get(request_uri, params=query_params, timeout=HTTP_REQUEST_TIMEOUT)
 
                 response.raise_for_status()
 
@@ -110,7 +114,7 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
        
                 assert octoprint_api_key is not None and len(octoprint_api_key) > 0
 
-                response = requests.get(job_uri,  headers = { "X-Api-Key" : octoprint_api_key }, timeout=1)
+                response = requests.get(job_uri,  headers = { "X-Api-Key" : octoprint_api_key }, timeout=HTTP_REQUEST_TIMEOUT)
                 response.raise_for_status()
 
                 return response.json()
@@ -121,7 +125,7 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
 
                 assert octoprint_api_key is not None and len(octoprint_api_key) > 0
 
-                response = requests.get(profile_uri,  headers = { "X-Api-Key" : octoprint_api_key }, timeout=5)
+                response = requests.get(profile_uri,  headers = { "X-Api-Key" : octoprint_api_key }, timeout=HTTP_REQUEST_TIMEOUT)
                 response.raise_for_status()
 
                 return response.json()
@@ -132,9 +136,11 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
 
                 assert octoprint_api_key is not None and len(octoprint_api_key) > 0
 
-                response = requests.get(profile_uri,  headers = { "X-Api-Key" : octoprint_api_key }, timeout=5)
+                response = requests.get(profile_uri,  headers = { "X-Api-Key" : octoprint_api_key }, timeout=HTTP_REQUEST_TIMEOUT)
                 response.raise_for_status()
                 json_response = response.json()
+
+                print('P' * 40 + str(printer_profile_id))
 
                 return json_response['profiles'][printer_profile_id]
 
@@ -144,7 +150,7 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
 
                 assert octoprint_api_key is not None and len(octoprint_api_key) > 0
 
-                response = requests.get(profile_uri,  headers = { "X-Api-Key" : octoprint_api_key }, timeout=5)
+                response = requests.get(profile_uri,  headers = { "X-Api-Key" : octoprint_api_key }, timeout=HTTP_REQUEST_TIMEOUT)
                 response.raise_for_status()
                 printers = response.json()['profiles']
 
@@ -152,13 +158,27 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                         if printers[printer]['current']:
                                 return printers[printer]
 
+        def _get_default_slice_profile(self, slicer):
+                profile_uri = "http://localhost/api/slicing/{}/profiles".format(slicer)
+                octoprint_api_key = self._settings.get(["apiKey"])
+
+                assert octoprint_api_key is not None and len(octoprint_api_key) > 0
+
+                response = requests.get(profile_uri,  headers = { "X-Api-Key" : octoprint_api_key }, timeout=HTTP_REQUEST_TIMEOUT)
+                response.raise_for_status()
+                profiles = response.json()
+
+                for profile in profiles:
+                        if profiles[profile]['default']:
+                                return profile
+
         def _get_local_file_metadata(self, local_file_name):
                 local_file_uri = "http://localhost/api/files/local/{}".format(urllib.quote_plus(local_file_name))
                 octoprint_api_key = self._settings.get(["apiKey"])
 
                 assert octoprint_api_key is not None and len(octoprint_api_key) > 0
 
-                response = requests.get(local_file_uri,  headers = { "X-Api-Key" : octoprint_api_key }, timeout=5)
+                response = requests.get(local_file_uri,  headers = { "X-Api-Key" : octoprint_api_key }, timeout=HTTP_REQUEST_TIMEOUT)
                 response.raise_for_status()
                 json_response = response.json()
 
@@ -170,7 +190,7 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
 
                 assert octoprint_api_key is not None and len(octoprint_api_key) > 0
 
-                response = requests.get(job_uri,  headers = { "X-Api-Key" : octoprint_api_key }, timeout=5)
+                response = requests.get(job_uri,  headers = { "X-Api-Key" : octoprint_api_key }, timeout=HTTP_REQUEST_TIMEOUT)
                 response.raise_for_status()
                 job = response.json()
 
@@ -273,6 +293,20 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                 
                 if horizontal_flip:
                         subprocess_args.append('-f')
+
+                subprocess_args.append('-u')
+
+                current_url = request.url
+                split_url = urlsplit(current_url)
+
+                split_url_port = ''
+                
+                if split_url.port is not None:
+                        split_url_port = ":{}".format(split_url.port) 
+
+                subprocess_args.append("{}://{}{}".format(split_url.scheme, split_url.hostname, split_url_port))
+
+                print('#' * 50 + str(subprocess_args)) 
                 
                 output = subprocess.check_output(subprocess_args)
                 
@@ -388,8 +422,16 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
 
         def _associate_profile_gcode(self, gcode_identifier, slicer, slicing_profile_name, printer_profile_id):
 
+                self._logger.info('ASSOCIATE PROFILE' * 4 + slicing_profile_name)
+
                 slicing_profile = self._get_slice_profile(slicer, slicing_profile_name)
-                printer_profile = self._get_printer_profile(printer_profile_id)
+
+                printer_profile = {}
+
+                if isinstance(printer_profile_id, dict):
+                        printer_profile = printer_profile_id
+                else:
+                        printer_profile = self._get_printer_profile(printer_profile_id)
 
                 layer_height = None
 
@@ -483,7 +525,8 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                             camFlipHorizontal=False,
                             jobProgress='',
                             layerHeight='',
-                            sharingMode=False)
+                            sharingMode=False,
+                            autoPrintMode=False)
 
 	def get_template_configs(self):
 		return [
@@ -493,6 +536,37 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
 
 	def get_assets(self):
 		return dict(js=["js/Locbit.js"])
+
+        def _auto_print(self, file_info):
+
+                if not self._settings.get(['autoPrintMode']):
+                        return
+
+                file_name = file_info['name']
+                file_path = file_info['path']
+                file_target = file_info['target']
+
+                if file_name.endswith('.stl') and file_target == 'local':
+                        auto_print_uri = "http://localhost/api/files/local/{}".format(urllib.quote_plus(file_path))
+                        octoprint_api_key = self._settings.get(["apiKey"])
+
+                        default_slice_profile = self._get_default_slice_profile('cura')
+                        printer_profile = self._get_current_printer_profile()
+                        
+                        slice_data = {
+                                      'command': 'slice',
+                                      'print': True,
+                                      'profile': default_slice_profile,
+                                      'printerProfile': printer_profile
+                                     }
+
+                        assert octoprint_api_key is not None and len(octoprint_api_key) > 0
+                        response = requests.post(auto_print_uri, headers = { "X-Api-Key" : octoprint_api_key }, json=slice_data, timeout=HTTP_REQUEST_TIMEOUT)
+                        response.raise_for_status()
+                        json_response = response.json()
+
+                        return json_response
+   
 
 	def on_event(self, event, payload, **kwargs):
 		global Layer
@@ -525,6 +599,8 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                         self._update_profile_event_stats(event)
                 elif event == "PrintResumed":
                         self._update_profile_event_stats(event)
+                elif event == "Upload":
+                        self._auto_print(payload)
                         
 		if event in locbitMsgDict:
 			event_body = {

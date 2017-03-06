@@ -13,8 +13,11 @@ try:
     
     if len(sys.argv) >= 2 and sys.argv[1] == '-f':
         horizontal_flip = True
+        camera_url = sys.argv[3]
+    else:
+        camera_url = sys.argv[2] 
 
-    json_result = json.dumps({'result': qr_reader.scan(horizontal_flip=horizontal_flip)})
+    json_result = json.dumps({'result': qr_reader.scan(horizontal_flip=horizontal_flip, camera_base_url=camera_url)})
 except TimeoutError as e:
     json_result = json.dumps({'error': 'Timeout reading QR code. QR code not detected'})
 except Exception as e:

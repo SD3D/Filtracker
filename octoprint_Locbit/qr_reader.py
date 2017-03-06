@@ -6,8 +6,8 @@ import sys
 TIMEOUT_SECONDS = 15
 
 @timeout_decorator.timeout(TIMEOUT_SECONDS)
-def scan(horizontal_flip=False):
-    jc = JpegStreamCamera("http://octopi.local/webcam/?action=stream")
+def scan(horizontal_flip=False, camera_base_url='http://octopi.local'):
+    jc = JpegStreamCamera("{}/webcam/?action=stream".format(camera_base_url))
     qrcode = []
     
     while(not qrcode):

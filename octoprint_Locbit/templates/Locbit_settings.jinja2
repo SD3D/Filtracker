@@ -34,6 +34,13 @@
                 </label>
             </div>
         </div>
+        <div class="control-group">
+            <div class="controls">
+                <label class="checkbox">
+                    <input type="checkbox" data-bind="checked: settings.plugins.Locbit.autoPrintMode"> {{ _('Enable automatic slicing and printing of uploaded STL files') }}
+                </label>
+            </div>
+        </div>
         <label class="control-label">{{ _('Material') }}</label>
         <div class="controls">
             <input type="text" class="input-block-level" data-bind="value: settings.plugins.Locbit.material">
