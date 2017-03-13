@@ -23,7 +23,7 @@ uid = "55de667a295efb62093205e4"
 url = "https://test-api.locbit.com/endpoint"
 status_url = 'https://test-api.locbit.com/statusByLid'
 
-HTTP_REQUEST_TIMEOUT=30
+HTTP_REQUEST_TIMEOUT=50
 
 class LocbitPlugin(octoprint.plugin.StartupPlugin,
 			octoprint.plugin.TemplatePlugin,
@@ -139,8 +139,6 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                 response = requests.get(profile_uri,  headers = { "X-Api-Key" : octoprint_api_key }, timeout=HTTP_REQUEST_TIMEOUT)
                 response.raise_for_status()
                 json_response = response.json()
-
-                print('P' * 40 + str(printer_profile_id))
 
                 return json_response['profiles'][printer_profile_id]
 
@@ -352,6 +350,7 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
 
                                try:
                                        self._set_default_slice_profile(return_result['muid'][0:7])
+
                                except Exception as e:
                                        return flask.jsonify(result=return_result, locbit_error="Setting profile {} as default failed, check to see if it exists".format(return_result['muid']))
 
@@ -383,14 +382,14 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                 gcode_file_metadata = self._get_local_file_metadata(gcode_file_name)
                 gcode_identifier = gcode_file_metadata['hash']
 
-                layer_height = None
+                #layer_height = None
                 
-                try:
-                        layer_height = int( self._settings.get(['layerHeight']) )
-                        assert layer_height > 0
-                except Exception as e:
-                        self._logger.error('Cannot make profile stat request, layer height must be non-zero positive integer')
-                        return
+                #try:
+                #        layer_height = int( self._settings.get(['layerHeight']) )
+                #        assert layer_height > 0
+                #except Exception as e:
+                #        self._logger.error('Cannot make profile stat request, layer height must be non-zero positive integer')
+                #        return
 
                 profile_update_data =json.dumps( {
                                                   'printer_event': printer_event, 
@@ -399,7 +398,7 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                                                   'printer_make': printer_make,
                                                   'printer_model': printer_model,
                                                   'nozzle_size': nozzle_size, 
-                                                  'layer_height': layer_height
+                                                  #'layer_height': layer_height
                                                  }
                                                )  
                 
@@ -418,7 +417,85 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
 
                 response = requests.post(locbit_info_share_event_uri, params=query_params, headers={'Content-Type': 'application/json'}, data=profile_update_data).json()
 
-                self._logger.info('EVENT STAT RESPONSE' * 3 + str(response)) 
+                self._logger.info('EVENT STAT RESPONSE' * 3 + str(response))
+
+        def _download_best_profile(self):
+
+                current_printer = self._get_current_printer_profile()
+
+                printer_make = current_printer['id']
+                printer_model = current_printer['model']
+                nozzle_size = current_printer['extruder']['nozzleDiameter']
+
+                muid = self._settings.get(['muid'])[0:7]
+
+                layer_height = None
+                layer_height_threshold = None
+
+                try:
+                        layer_height = float(self._settings.get(['layerHeight']))
+                        layer_height_threshold = float(self._settings.get(['layerHeightThreshold']))
+                except Exception as e:
+                        self._logger.error("Could not parse layer height {} or layer height threshold {} as float, skipping best profile download".format(layer_height, layer_height_threshold))
+                        return
+
+                best_profile = self._get_best_profile(printer_make, printer_model, nozzle_size, muid, layer_height, layer_height_threshold)
+
+                if best_profile['success']:
+                        print("best profile data:" + str(best_profile))
+                        best_profile['data']['slicing_profile']['key'] = 'locbit' + best_profile['data']['slicing_profile']['key']
+
+                        best_profile['data']['slicing_profile']['default'] = False
+
+                        self._upload_new_profile(best_profile['data']['slicing_profile'])
+                else:
+                        self._logger.error("Error getting best profile, skipping best profile download")
+
+        def _get_best_profile(self, printer_make, printer_model, nozzle_size, muid, layer_height, layer_height_threshold):
+                #printer_make = urllib.quote(printer_make)
+                #printer_model = urllib.quote(printer_model)
+
+                locbit_api_key = self._settings.get(['locbitAPIKey'])
+                locbit_access_id = self._settings.get(['locbitAccessID'])
+
+                query_data = {
+                              'printer_make': printer_make,
+                              'printer_model': printer_model,
+                              'nozzle_size': nozzle_size,
+                              'muid': muid,
+                              'layer_height': layer_height,
+                              'layer_height_threshold': layer_height_threshold,
+                              'api': locbit_api_key,
+                              'access': locbit_access_id
+                             }
+
+                query_str = urllib.urlencode(query_data)
+
+                if len(locbit_api_key) == 0 or len(locbit_access_id) == 0:
+                       self._logger.error("No API key or access key in settings. Skipping getting best profile")
+                       return 
+
+                locbit_uri = 'https://sd3d.locbit.com/slicing_profile'
+
+                self._logger.info('GET BEST PROFILE REQUEST' * 3 + str(query_data))
+
+                response = requests.get(locbit_uri, params=query_data)
+
+                self._logger.info('GET BEST PROFILE RESPONSE' * 3 + str(response) + str(response.url))
+
+                return response.json()
+
+        def _upload_new_profile(self, profile):
+                profile_uri = "http://localhost/api/slicing/cura/profiles/{}".format(profile['key'])
+                octoprint_api_key = self._settings.get(["apiKey"])
+
+                assert octoprint_api_key is not None and len(octoprint_api_key) > 0
+
+                response = requests.put(profile_uri,  headers = { "X-Api-Key" : octoprint_api_key}, json=profile, timeout=HTTP_REQUEST_TIMEOUT)
+                response.raise_for_status()
+
+                return response.json()
+                  
 
         def _associate_profile_gcode(self, gcode_identifier, slicer, slicing_profile_name, printer_profile_id):
 
@@ -428,23 +505,21 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
 
                 printer_profile = {}
 
-                if isinstance(printer_profile_id, dict):
-                        printer_profile = printer_profile_id
-                else:
-                        printer_profile = self._get_printer_profile(printer_profile_id)
+                printer_profile = self._get_printer_profile(printer_profile_id)
 
-                layer_height = None
+                #layer_height = None
 
-                try:
-                        layer_height = int( self._settings.get(['layerHeight']) )
-                        assert layer_height > 0
-                except Exception as e:
-                        self._logger.error('Cannot make gcode association request, layer height must be non-zero positive integer')
-                        return
+                #try:
+                #        layer_height = int( self._settings.get(['layerHeight']) )
+                #        assert layer_height > 0
+                #except Exception as e:
+                #        self._logger.error('Cannot make gcode association request, layer height must be non-zero positive integer')
+                #        return
 
                 request_data = json.dumps({'muid': self._settings.get(['muid'])[0:7], 'gcode_identifier': gcode_identifier, 
                                            'slicing_profile': slicing_profile, 'printer_make': printer_profile_id,
-                                           'printer_model': printer_profile['model'], 'nozzle_size': printer_profile['extruder']['nozzleDiameter'], 'layer_height': layer_height})
+                                           'printer_model': printer_profile['model'], 'nozzle_size': printer_profile['extruder']['nozzleDiameter']}) 
+                                           #'layer_height': layer_height})
  
                 self._logger.info('PROFILE ASSOCIATION REQUEST' * 3 + str(request_data))
 
@@ -462,7 +537,7 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                 response = requests.post(locbit_info_share_uri, params=query_params, headers={'Content-Type': 'application/json'}, data=request_data).json()
 
                 self._logger.info('PROFILE ASSOCIATION RESPONSE' * 3 + str(response))
-                
+
                  
 
 	def on_after_startup(self):
@@ -511,6 +586,8 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                         return slice_monkey_patch
 
                 octoprint.slicing.SlicingManager.slice = slice_monkey_patch_gen(octoprint.slicing.SlicingManager.slice)
+                if self._settings.get(['cloudMode']):
+                        self._download_best_profile()
 
 	def get_settings_defaults(self):
 		return dict(did="TEST_PRINTER",
@@ -526,7 +603,10 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                             jobProgress='',
                             layerHeight='',
                             sharingMode=False,
-                            autoPrintMode=False)
+                            cloudMode=False,
+                            autoPrintMode=False,
+                            fillDensity='20',
+                            layerHeightThreshold='')
 
 	def get_template_configs(self):
 		return [
@@ -542,23 +622,38 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                 if not self._settings.get(['autoPrintMode']):
                         return
 
+                fill_density_percentage = self._settings.get(['fillDensity'])
+
+                try:
+                        fill_density_percentage = int(fill_density_percentage)
+                        assert fill_density_percentage > 0 and fill_density_percentage <= 100
+                except Exception as e:
+                        self._logger.error("Fill density setting {} is invalid, must be percentage (integer)".format(str(fill_density_percentage)))
+                        fill_density_percentage = None 
+
                 file_name = file_info['name']
                 file_path = file_info['path']
                 file_target = file_info['target']
 
-                if file_name.endswith('.stl') and file_target == 'local':
+                if file_name.lower().endswith('.stl') and file_target == 'local':
                         auto_print_uri = "http://localhost/api/files/local/{}".format(urllib.quote_plus(file_path))
                         octoprint_api_key = self._settings.get(["apiKey"])
 
-                        default_slice_profile = self._get_default_slice_profile('cura')
-                        printer_profile = self._get_current_printer_profile()
+                        #default_slice_profile_name = self._get_default_slice_profile('cura')['key']
+                        default_slice_profile_name = self._get_default_slice_profile('cura')
+                        print('&' * 30 + str(default_slice_profile_name))
+                        printer_profile_name = self._get_current_printer_profile()['id']
+                        print('Q' * 30 + str(printer_profile_name))
                         
                         slice_data = {
                                       'command': 'slice',
                                       'print': True,
-                                      'profile': default_slice_profile,
-                                      'printerProfile': printer_profile
+                                      'profile': default_slice_profile_name,
+                                      'printerProfile': printer_profile_name
                                      }
+
+                        if fill_density_percentage is not None:
+                                slice_data['profile.fill_density'] = fill_density_percentage
 
                         assert octoprint_api_key is not None and len(octoprint_api_key) > 0
                         response = requests.post(auto_print_uri, headers = { "X-Api-Key" : octoprint_api_key }, json=slice_data, timeout=HTTP_REQUEST_TIMEOUT)

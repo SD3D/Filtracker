@@ -16,9 +16,17 @@
         <div class="controls">
             <input type="text" class="input-block-level" data-bind="value: settings.plugins.Locbit.locbitAccessID">
         </div>
-        <label class="control-label">{{ _('Layer Height in μm') }}</label>
+        <label class="control-label">{{ _('Desired Layer Height in mm') }}</label>
         <div class="controls">
             <input type="text" class="input-block-level" data-bind="value: settings.plugins.Locbit.layerHeight">
+        </div>
+        <label class="control-label">{{ _('Layer Height difference threshold in mm') }}</label>
+        <div class="controls">
+            <input type="text" class="input-block-level" data-bind="value: settings.plugins.Locbit.layerHeightThreshold">
+        </div>
+        <label class="control-label">{{ _('Fill density percentage (1-100)') }}</label>
+        <div class="controls">
+            <input type="text" class="input-block-level" data-bind="value: settings.plugins.Locbit.fillDensity">
         </div>
         <div class="control-group">
             <div class="controls">
@@ -31,6 +39,13 @@
             <div class="controls">
                 <label class="checkbox">
                     <input type="checkbox" data-bind="checked: settings.plugins.Locbit.sharingMode"> {{ _('Enable information sharing with Locbit (Sharing Mode)') }}
+                </label>
+            </div>
+        </div>
+        <div class="control-group">
+            <div class="controls">
+                <label class="checkbox">
+                    <input type="checkbox" data-bind="checked: settings.plugins.Locbit.cloudMode"> {{ _('Enable downloading of profiles from Locbit (Cloud Mode)') }}
                 </label>
             </div>
         </div>
