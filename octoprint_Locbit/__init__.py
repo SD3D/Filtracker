@@ -277,8 +277,11 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                         for qr_data_key in ['material', 'diameter', 'color', 'length', 'muid']:
                                 return_result[qr_data_key] = self._settings.get([qr_data_key])
                         
-                        return_result['length'] = "{0:.3f}".format(float(return_result['length'])) 
+                        return_result['length'] = "{0:.3f}".format(float(return_result['length']))
                         return flask.jsonify(result=return_result)
+
+                if request.args.get('autoprint_setting') == '1':
+                        return flask.jsonify(result=self._settings.get(['autoPrintMode']))
                 
 		import subprocess
    
@@ -354,7 +357,10 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                                except Exception as e:
                                        return flask.jsonify(result=return_result, locbit_error="Setting profile {} as default failed, check to see if it exists".format(return_result['muid']))
 
-                               return_result['length'] = "{0:.3f}".format(float(return_result['length'])) 
+                               return_result['length'] = "{0:.3f}".format(float(return_result['length']))
+
+                               if self._settings.get(['cloudMode']):
+                                       self._download_best_profile() 
 
 		               return flask.jsonify(result=return_result)
 		       else:
@@ -711,6 +717,8 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
 				'event' : 'File',
 				'status' : payload['filename']
 			}
+                        if self._settings.get(['cloudMode']):
+                                self._download_best_profile()
 		elif event == 'ZChange':
 			Layer += 1
 			event_body = {

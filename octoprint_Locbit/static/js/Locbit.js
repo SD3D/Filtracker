@@ -9,6 +9,7 @@ $(function() {
         var printerState = parameters[0];
         var settingsState = parameters[1];
         var filesState = parameters[2];
+        var filesViewModel = parameters[3];
         var self = this;
 
 
@@ -44,7 +45,6 @@ $(function() {
                                          text: 'QR code has been scanned'
                                        });
                         }
-                        
                     }
                     else {
                         
@@ -138,6 +138,34 @@ $(function() {
 
         }
 
+        function locbitFilesUploadDoneWrap(handleUploadFunc){
+            
+            locbitFilesUploadDone = function(e, data){
+                                        handleUploadFunc(e, data);
+
+                                        $.ajax({
+                                                type: "GET",
+                                                async: false,
+                                                url: "/api/plugin/Locbit?autoprint_setting=1",
+                                                success: function(data) {
+                                                if (data.hasOwnProperty('result')){
+                                                    if(data.result === true){
+                                                        $("#slicing_configuration_dialog").modal("hide");
+                                                    }
+                                                   
+                                                }
+
+                                                else if (data.hasOwnProperty('error')){
+
+                                                         alert("Error: " + data.error);
+                                                }
+                                        }});
+                                       }
+
+            return locbitFilesUploadDone;
+        }
+        
+
         self.onStartup = function() {
             var element = $("#state").find(".accordion-inner .progress");
             if (element.length) {
@@ -153,6 +181,7 @@ $(function() {
                 element.before(text4 + ": <strong id='muid'></strong><br>");
 
                 filesState.loadFile = locbitLoadFile;
+                filesViewModel._handleUploadDone = locbitFilesUploadDoneWrap(filesViewModel._handleUploadDone)
                 
             }
 
@@ -190,7 +219,7 @@ $(function() {
     // view model class, parameters for constructor, container to bind to
     OCTOPRINT_VIEWMODELS.push([
         LocbitViewModel,
-        ["printerStateViewModel", "settingsViewModel", "gcodeFilesViewModel"],
+        ["printerStateViewModel", "settingsViewModel", "gcodeFilesViewModel", "filesViewModel"],
         []
     ]);
 });
