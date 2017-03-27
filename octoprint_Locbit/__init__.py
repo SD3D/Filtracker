@@ -259,13 +259,13 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                 except Exception as e:
                         self._logger.error("Could not update length: {}".format(str(e)))
 
-        def _set_default_slice_profile(self, muid_prefix):
+        def _set_default_slice_profile(self, profile_name):
                 slice_profile_path = settings().get(['folder', 'slicingProfiles'])
                 
                 slice_manager = SlicingManager(slice_profile_path, printerProfileManager)
                 slice_manager.reload_slicers()
                 default_slicer = slice_manager.default_slicer
-                slice_manager.set_default_profile(default_slicer, muid_prefix, require_exists=True)
+                slice_manager.set_default_profile(default_slicer, profile_name, require_exists=True)
                 
 
 	def on_api_get(self, request):
@@ -359,9 +359,6 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
 
                                return_result['length'] = "{0:.3f}".format(float(return_result['length']))
 
-                               if self._settings.get(['cloudMode']):
-                                       self._download_best_profile() 
-
 		               return flask.jsonify(result=return_result)
 		       else:
 		               return flask.jsonify(error="Invalid QR code")
@@ -403,7 +400,8 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                                                   'gcode_identifier': gcode_identifier,
                                                   'printer_make': printer_make,
                                                   'printer_model': printer_model,
-                                                  'nozzle_size': nozzle_size, 
+                                                  'nozzle_size': nozzle_size,
+                                                  'material_diameter': float("{0:.3f}".format(float(self._settings.get(['diameter'])))) 
                                                   #'layer_height': layer_height
                                                  }
                                                )  
@@ -424,8 +422,19 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                 response = requests.post(locbit_info_share_event_uri, params=query_params, headers={'Content-Type': 'application/json'}, data=profile_update_data).json()
 
                 self._logger.info('EVENT STAT RESPONSE' * 3 + str(response))
+ 
+                if printer_event == 'PrintStarted' and not response['success']:
+                        self._logger.error("Profile stats update failed: %s".format(response['data']))
+                        self._send_client_alert("Could not update profile stats on PrintStart: %s" % response['data'])
+               
 
         def _download_best_profile(self):
+
+                cloud_mode = self._settings.get(['cloudMode'])
+
+                if not cloud_mode:
+                        self._logger.info('Cloud Mode turned off, skipping best profile download')
+                        return        
 
                 current_printer = self._get_current_printer_profile()
 
@@ -434,6 +443,8 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                 nozzle_size = current_printer['extruder']['nozzleDiameter']
 
                 muid = self._settings.get(['muid'])[0:7]
+
+                material_diameter = float("{0:.3f}".format(float(self._settings.get(['diameter']))))
 
                 layer_height = None
                 layer_height_threshold = None
@@ -445,19 +456,44 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                         self._logger.error("Could not parse layer height {} or layer height threshold {} as float, skipping best profile download".format(layer_height, layer_height_threshold))
                         return
 
-                best_profile = self._get_best_profile(printer_make, printer_model, nozzle_size, muid, layer_height, layer_height_threshold)
+                best_profile = self._get_best_profile(printer_make, printer_model, nozzle_size, muid, layer_height, layer_height_threshold, material_diameter)
 
                 if best_profile['success']:
                         print("best profile data:" + str(best_profile))
-                        best_profile['data']['slicing_profile']['key'] = 'locbit' + best_profile['data']['slicing_profile']['key']
+                        best_profile['data']['slicing_profile']['key'] = 'SD3D' + best_profile['data']['slicing_profile']['key']
 
                         best_profile['data']['slicing_profile']['default'] = False
 
                         self._upload_new_profile(best_profile['data']['slicing_profile'])
+
+                        self._set_best_or_default_profile(best_profile['data']['slicing_profile']['key'])
                 else:
                         self._logger.error("Error getting best profile, skipping best profile download")
+                        muid_prefix = self._settings.get(['muid'])[0:7]
+                        try:
+                                self._set_default_slice_profile(muid_prefix)
+                        except Exception as e:
+                                self._logger.error("Could not set default muid profile %s".format(muid_prefix))
+                                self._send_client_alert("Could not get best profile and setting default slice profile for muid %s failed" % muid_prefix)
 
-        def _get_best_profile(self, printer_make, printer_model, nozzle_size, muid, layer_height, layer_height_threshold):
+        def _send_client_alert(self, message):
+                self._plugin_manager.send_plugin_message(self._identifier, message)
+
+        def _set_best_or_default_profile(self, best_profile_name):
+                
+                muid_prefix = self._settings.get(['muid'])[0:7]
+                
+                try:
+                        self._set_default_slice_profile(best_profile_name)
+                except Exception as e:
+
+                        try:
+                                self._set_default_slice_profile(muid_prefix)
+                        except Exception as e:
+                                self._logger.error("Could not set best profile %s, nor default muid profile %s, check if either one exists".format(best_profile_name, muid_prefix))
+                                self._send_client_alert("Could not set best profile %s, nor default muid profile %s, check if either one exists" % (best_profile_name, muid_prefix)) 
+
+        def _get_best_profile(self, printer_make, printer_model, nozzle_size, muid, layer_height, layer_height_threshold, material_diameter):
                 #printer_make = urllib.quote(printer_make)
                 #printer_model = urllib.quote(printer_model)
 
@@ -471,6 +507,7 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                               'muid': muid,
                               'layer_height': layer_height,
                               'layer_height_threshold': layer_height_threshold,
+                              'material_diameter': material_diameter,
                               'api': locbit_api_key,
                               'access': locbit_access_id
                              }
@@ -487,7 +524,7 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
 
                 response = requests.get(locbit_uri, params=query_data)
 
-                self._logger.info('GET BEST PROFILE RESPONSE' * 3 + str(response) + str(response.url))
+                self._logger.info('GET BEST PROFILE RESPONSE' * 3 + str(response.json()) + str(response.url))
 
                 return response.json()
 
@@ -524,7 +561,8 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
 
                 request_data = json.dumps({'muid': self._settings.get(['muid'])[0:7], 'gcode_identifier': gcode_identifier, 
                                            'slicing_profile': slicing_profile, 'printer_make': printer_profile_id,
-                                           'printer_model': printer_profile['model'], 'nozzle_size': printer_profile['extruder']['nozzleDiameter']}) 
+                                           'printer_model': printer_profile['model'], 'nozzle_size': printer_profile['extruder']['nozzleDiameter'],
+                                           'material_diameter': float("{0:.3f}".format(float(self._settings.get(['diameter'])))) }) 
                                            #'layer_height': layer_height})
  
                 self._logger.info('PROFILE ASSOCIATION REQUEST' * 3 + str(request_data))
@@ -592,8 +630,6 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                         return slice_monkey_patch
 
                 octoprint.slicing.SlicingManager.slice = slice_monkey_patch_gen(octoprint.slicing.SlicingManager.slice)
-                if self._settings.get(['cloudMode']):
-                        self._download_best_profile()
 
 	def get_settings_defaults(self):
 		return dict(did="TEST_PRINTER",
@@ -681,7 +717,8 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
 			Layer = 0
 			self.sendLayerStatus(Layer)
                         self._update_spool_length(update_remote=True)
-                        self._update_profile_event_stats(event) 
+                        self._update_profile_event_stats(event)
+                        self._download_best_profile() 
 		elif event == "PrintFailed":
 			Layer = 0
 			self.sendLayerStatus(Layer)
@@ -702,6 +739,7 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                         self._update_profile_event_stats(event)
                 elif event == "Upload":
                         self._auto_print(payload)
+                        self._download_best_profile()
                         
 		if event in locbitMsgDict:
 			event_body = {
@@ -717,8 +755,6 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
 				'event' : 'File',
 				'status' : payload['filename']
 			}
-                        if self._settings.get(['cloudMode']):
-                                self._download_best_profile()
 		elif event == 'ZChange':
 			Layer += 1
 			event_body = {

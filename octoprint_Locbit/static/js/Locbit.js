@@ -12,6 +12,19 @@ $(function() {
         var filesViewModel = parameters[3];
         var self = this;
 
+        self.onDataUpdaterPluginMessage = function(plugin, data) {
+            if (plugin != "Locbit") {
+				// console.log('Ignoring '+plugin);
+                return;
+            }
+
+            new PNotify({
+                         title: 'Alert',
+                         text: data 
+                        });
+			
+	}
+
 
         function setQRData(qr_data){
             $('#material').html(qr_data.material);
