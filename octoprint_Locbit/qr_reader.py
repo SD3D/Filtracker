@@ -6,9 +6,11 @@ import sys
 TIMEOUT_SECONDS = 15
 
 @timeout_decorator.timeout(TIMEOUT_SECONDS)
-def scan(horizontal_flip=False, camera_base_url='http://octopi.local'):
+def scan(camera_base_url='http://octopi.local'):
     jc = JpegStreamCamera("{}/webcam/?action=stream".format(camera_base_url))
     qrcode = []
+
+    horizontal_flip = True
     
     while(not qrcode):
         img_og = jc.getImage() #gets image from the camera
@@ -17,6 +19,9 @@ def scan(horizontal_flip=False, camera_base_url='http://octopi.local'):
 
         if horizontal_flip:
             img = img_og.flipHorizontal()
+            horizontal_flip = False
+        else:
+            horizontal_flip = True
 
         qrcode = img.findBarcode() #finds qr data from image
 

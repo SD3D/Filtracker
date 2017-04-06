@@ -285,16 +285,11 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                 
 		import subprocess
    
-                horizontal_flip = self._settings.get(['camFlipHorizontal'])
-
                 qr_script_path = '/home/pi/oprint/lib/python2.7/site-packages/octoprint_Locbit/qr.py'
                 subprocess_args = [qr_script_path]
 
                 output = ''
                 
-                if horizontal_flip:
-                        subprocess_args.append('-f')
-
                 subprocess_args.append('-u')
 
                 current_url = request.url
@@ -307,8 +302,6 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
 
                 subprocess_args.append("{}://{}{}".format(split_url.scheme, split_url.hostname, split_url_port))
 
-                print('#' * 50 + str(subprocess_args)) 
-                
                 output = subprocess.check_output(subprocess_args)
                 
                 json_output = json.loads(output)
@@ -641,7 +634,6 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                             muid='',
                             locbitAPIKey='',
                             locbitAccessID='',
-                            camFlipHorizontal=False,
                             jobProgress='',
                             layerHeight='',
                             sharingMode=False,
