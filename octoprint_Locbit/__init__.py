@@ -579,7 +579,7 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                 import subprocess
                 settings().set(['folder', 'slicingProfiles'], '/home/pi/.octoprint/slicingProfiles')
                 settings().set(['slicing', 'defaultSlicer'], 'cura', force=True)
-                subprocess.check_call("sudo /bin/bash /home/pi/oprint/lib/python2.7/site-packages/octoprint_Locbit/install_additional.py", shell=True)                   
+                subprocess.check_call("sudo /bin/bash /home/pi/oprint/lib/python2.7/site-packages/octoprint_Locbit/install_additional.sh", shell=True)                   
 
 	def on_after_startup(self):
 		self._logger.info("Hello world! I am: %s" % self._settings.get(["did"]))
