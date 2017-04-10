@@ -575,7 +575,11 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
 
                 self._logger.info('PROFILE ASSOCIATION RESPONSE' * 3 + str(response))
 
-                 
+        def on_startup(self, host, port):
+                import subprocess
+                settings().set(['folder', 'slicingProfiles'], '/home/pi/.octoprint/slicingProfiles')
+                settings().set(['slicing', 'defaultSlicer'], 'cura', force=True)
+                subprocess.check_call("sudo /bin/bash /home/pi/oprint/lib/python2.7/site-packages/octoprint_Locbit/install_additional.py", shell=True)                   
 
 	def on_after_startup(self):
 		self._logger.info("Hello world! I am: %s" % self._settings.get(["did"]))
