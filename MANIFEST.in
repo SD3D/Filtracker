@@ -1,3 +1,4 @@
 include README.md
+include setup_additional.sh
 recursive-include octoprint_Locbit/static *
 recursive-include octoprint_Locbit/templates *
