@@ -582,8 +582,10 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
 
                 commands = ['/usr/bin/apt-get update',
                             '/usr/bin/apt-get install -y ipython python-opencv python-scipy python-numpy python-setuptools python-pip python-pygame python-zbar',
-                            '/usr/local/bin/pip --no-cache-dir install svgwrite https://github.com/sightmachine/SimpleCV/zipball/master timeout-decorator',
-                            '/bin/chmod +x /home/pi/oprint/lib/python2.7/site-packages/octoprint_Locbit/qr.py']
+                            '/bin/chmod +x /home/pi/oprint/lib/python2.7/site-packages/octoprint_Locbit/qr.py'
+                            '/usr/bin/pip install --upgrade pip',
+                            '/usr/local/bin/pip --no-cache-dir install timeout-decorator svgwrite https://github.com/sightmachine/SimpleCV/zipball/master'
+                           ]
 
                 for command in commands:
                         subprocess.check_call("/bin/bash -c 'sudo {}'".format(command), shell=True)
