@@ -815,9 +815,7 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
         
         def is_wizard_required(self):
 
-                return self._settings.get(['sd3dAPIKey']) is None or \
-                       self._settings.get(['sd3dAccessID']) is None or \
-                       self._settings.get(['sd3dAccessID']) is None
+                return self._settings.get(['sd3dAPIKey']) is None or self._settings.get(['sd3dAccessID']) is None or self._settings.get(['sd3dAccessID']) is None
         
         def on_wizard_finish(handled):
                 if handled:
