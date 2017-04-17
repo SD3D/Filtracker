@@ -575,7 +575,7 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
 
                 self._logger.info('PROFILE ASSOCIATION RESPONSE' * 3 + str(response))
 
-        def on_startup(self, host, port):
+        def install_dependencies(self):
                 import subprocess
                 settings().set(['folder', 'slicingProfiles'], '/home/pi/.octoprint/slicingProfiles')
                 settings().set(['slicing', 'defaultSlicer'], 'cura', force=True)
