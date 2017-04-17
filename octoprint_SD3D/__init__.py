@@ -31,7 +31,8 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
 			octoprint.plugin.SettingsPlugin,
 			octoprint.plugin.EventHandlerPlugin,
 			octoprint.plugin.AssetPlugin,
-			octoprint.plugin.SimpleApiPlugin):
+			octoprint.plugin.SimpleApiPlugin,
+                        octoprint.plugin.WizardPlugin):
 
 
 	def get_api_commands(self):
@@ -811,7 +812,16 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
 			self._logger.info(r.text)
 		except BadStatusLine:
 			self._logger.info("SD3D: Bad Status")
+        
+        def is_wizard_required(self):
 
+                return self._settings.get(['sd3dAPIKey']) is None or
+                       self._settings.get(['sd3dAccessID']) is None or
+                       self._settings.get(['sd3dAccessID']) is None
+        
+        def on_wizard_finish(handled):
+                if handled:
+                        self.install_dependencies()
 
 __plugin_name__ = "SD3D"
 __plugin_implementation__ = SD3DPlugin()
