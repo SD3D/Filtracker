@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division
 from httplib import BadStatusLine
-from .locbitNotifications import locbitMsgDict
+from .sd3dNotifications import sd3dMsgDict
 
 import octoprint.plugin
 from octoprint.slicing import SlicingManager, UnknownProfile
@@ -24,8 +24,9 @@ url = "https://test-api.locbit.com/endpoint"
 status_url = 'https://test-api.locbit.com/statusByLid'
 
 HTTP_REQUEST_TIMEOUT=50
+LAYER_HEIGHT_THRESHOLD=0.25
 
-class LocbitPlugin(octoprint.plugin.StartupPlugin,
+class SD3DPlugin(octoprint.plugin.StartupPlugin,
 			octoprint.plugin.TemplatePlugin,
 			octoprint.plugin.SettingsPlugin,
 			octoprint.plugin.EventHandlerPlugin,
@@ -68,15 +69,15 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
 
         def _get_spool_length(self, muid):
 
-                locbit_api_key = self._settings.get(['locbitAPIKey'])
-                locbit_access_id = self._settings.get(['locbitAccessID'])
+                sd3d_api_key = self._settings.get(['sd3dAPIKey'])
+                sd3d_access_id = self._settings.get(['sd3dAccessID'])
 
-                if len(locbit_api_key) == 0 or len(locbit_access_id) == 0:
-                        raise Exception("Cannot get stored spool length, either locbit api key or access ID is missing from settings")
+                if len(sd3d_api_key) == 0 or len(sd3d_access_id) == 0:
+                        raise Exception("Cannot get stored spool length, either sd3d api key or access ID is missing from settings")
 
                 request_uri = "{}/{}/SD3DPrinter".format(status_url, muid)
 
-                query_params = {'api': locbit_api_key, 'access': locbit_access_id} 
+                query_params = {'api': sd3d_api_key, 'access': sd3d_access_id} 
 
                 response = requests.get(request_uri, params=query_params, timeout=HTTP_REQUEST_TIMEOUT)
 
@@ -285,7 +286,7 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                 
 		import subprocess
    
-                qr_script_path = '/home/pi/oprint/lib/python2.7/site-packages/octoprint_Locbit/qr.py'
+                qr_script_path = '/home/pi/oprint/lib/python2.7/site-packages/octoprint_SD3D/qr.py'
                 subprocess_args = [qr_script_path]
 
                 output = ''
@@ -342,13 +343,13 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                                                self._post_spool_data(return_result)
 
                                except Exception as e:
-                                       return flask.jsonify(result=return_result, locbit_error=str(e))
+                                       return flask.jsonify(result=return_result, sd3d_error=str(e))
 
                                try:
                                        self._set_default_slice_profile(return_result['muid'][0:7])
 
                                except Exception as e:
-                                       return flask.jsonify(result=return_result, locbit_error="Setting profile {} as default failed, check to see if it exists".format(return_result['muid']))
+                                       return flask.jsonify(result=return_result, sd3d_error="Setting profile {} as default failed, check to see if it exists".format(return_result['muid']))
 
                                return_result['length'] = "{0:.3f}".format(float(return_result['length']))
 
@@ -401,18 +402,18 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                 
                 self._logger.info('UPDATE' * 5 + str(profile_update_data))
                 
-                locbit_info_share_event_uri = 'https://sd3d.locbit.com/event' 
+                sd3d_info_share_event_uri = 'https://sd3d.locbit.com/event' 
 
-                locbit_api_key = self._settings.get(['locbitAPIKey'])
-                locbit_access_id = self._settings.get(['locbitAccessID'])
+                sd3d_api_key = self._settings.get(['sd3dAPIKey'])
+                sd3d_access_id = self._settings.get(['sd3dAccessID'])
 
-                if len(locbit_api_key) == 0 or len(locbit_access_id) == 0:
+                if len(sd3d_api_key) == 0 or len(sd3d_access_id) == 0:
                         self._logger.error("No API key or access key in settings. Skipping stat update")
                         return
 
-                query_params = {'api': locbit_api_key, 'access': locbit_access_id}
+                query_params = {'api': sd3d_api_key, 'access': sd3d_access_id}
 
-                response = requests.post(locbit_info_share_event_uri, params=query_params, headers={'Content-Type': 'application/json'}, data=profile_update_data).json()
+                response = requests.post(sd3d_info_share_event_uri, params=query_params, headers={'Content-Type': 'application/json'}, data=profile_update_data).json()
 
                 self._logger.info('EVENT STAT RESPONSE' * 3 + str(response))
  
@@ -440,13 +441,12 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                 material_diameter = float("{0:.3f}".format(float(self._settings.get(['diameter']))))
 
                 layer_height = None
-                layer_height_threshold = None
+                layer_height_threshold = LAYER_HEIGHT_THRESHOLD 
 
                 try:
                         layer_height = float(self._settings.get(['layerHeight']))
-                        layer_height_threshold = float(self._settings.get(['layerHeightThreshold']))
                 except Exception as e:
-                        self._logger.error("Could not parse layer height {} or layer height threshold {} as float, skipping best profile download".format(layer_height, layer_height_threshold))
+                        self._logger.error("Could not parse layer height {}, skipping best profile download".format(layer_height))
                         return
 
                 best_profile = self._get_best_profile(printer_make, printer_model, nozzle_size, muid, layer_height, layer_height_threshold, material_diameter)
@@ -490,8 +490,8 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                 #printer_make = urllib.quote(printer_make)
                 #printer_model = urllib.quote(printer_model)
 
-                locbit_api_key = self._settings.get(['locbitAPIKey'])
-                locbit_access_id = self._settings.get(['locbitAccessID'])
+                sd3d_api_key = self._settings.get(['sd3dAPIKey'])
+                sd3d_access_id = self._settings.get(['sd3dAccessID'])
 
                 query_data = {
                               'printer_make': printer_make,
@@ -501,21 +501,21 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                               'layer_height': layer_height,
                               'layer_height_threshold': layer_height_threshold,
                               'material_diameter': material_diameter,
-                              'api': locbit_api_key,
-                              'access': locbit_access_id
+                              'api': sd3d_api_key,
+                              'access': sd3d_access_id
                              }
 
                 query_str = urllib.urlencode(query_data)
 
-                if len(locbit_api_key) == 0 or len(locbit_access_id) == 0:
+                if len(sd3d_api_key) == 0 or len(sd3d_access_id) == 0:
                        self._logger.error("No API key or access key in settings. Skipping getting best profile")
                        return 
 
-                locbit_uri = 'https://sd3d.locbit.com/slicing_profile'
+                sd3d_uri = 'https://sd3d.locbit.com/slicing_profile'
 
                 self._logger.info('GET BEST PROFILE REQUEST' * 3 + str(query_data))
 
-                response = requests.get(locbit_uri, params=query_data)
+                response = requests.get(sd3d_uri, params=query_data)
 
                 self._logger.info('GET BEST PROFILE RESPONSE' * 3 + str(response.json()) + str(response.url))
 
@@ -560,18 +560,18 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
  
                 self._logger.info('PROFILE ASSOCIATION REQUEST' * 3 + str(request_data))
 
-                locbit_info_share_uri = 'https://sd3d.locbit.com/profile'
+                sd3d_info_share_uri = 'https://sd3d.locbit.com/profile'
 
-                locbit_api_key = self._settings.get(['locbitAPIKey'])
-                locbit_access_id = self._settings.get(['locbitAccessID'])
+                sd3d_api_key = self._settings.get(['sd3dAPIKey'])
+                sd3d_access_id = self._settings.get(['sd3dAccessID'])
 
-                if len(locbit_api_key) == 0 or len(locbit_access_id) == 0:
+                if len(sd3d_api_key) == 0 or len(sd3d_access_id) == 0:
                         self._logger.error("No API key or access key in settings. Skipping profile update")
                         return
 
-                query_params = {'api': locbit_api_key, 'access': locbit_access_id}
+                query_params = {'api': sd3d_api_key, 'access': sd3d_access_id}
 
-                response = requests.post(locbit_info_share_uri, params=query_params, headers={'Content-Type': 'application/json'}, data=request_data).json()
+                response = requests.post(sd3d_info_share_uri, params=query_params, headers={'Content-Type': 'application/json'}, data=request_data).json()
 
                 self._logger.info('PROFILE ASSOCIATION RESPONSE' * 3 + str(response))
 
@@ -582,7 +582,7 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
 
                 commands = ['/usr/bin/apt-get update',
                             '/usr/bin/apt-get install -y ipython python-opencv python-scipy python-numpy python-setuptools python-pip python-pygame python-zbar',
-                            '/bin/chmod +x /home/pi/oprint/lib/python2.7/site-packages/octoprint_Locbit/qr.py',
+                            '/bin/chmod +x /home/pi/oprint/lib/python2.7/site-packages/octoprint_SD3D/qr.py',
                             '/usr/bin/pip install --upgrade pip',
                             '/usr/local/bin/pip --no-cache-dir install timeout-decorator svgwrite https://github.com/sightmachine/SimpleCV/zipball/master'
                            ]
@@ -645,15 +645,15 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                             initial_length='',
                             length='',
                             muid='',
-                            locbitAPIKey='',
-                            locbitAccessID='',
+                            sd3dAPIKey='',
+                            sd3dAccessID='',
                             jobProgress='',
                             layerHeight='',
                             sharingMode=False,
                             cloudMode=False,
                             autoPrintMode=False,
                             fillDensity='20',
-                            layerHeightThreshold='')
+                            )
 
 	def get_template_configs(self):
 		return [
@@ -662,7 +662,7 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
 		]
 
 	def get_assets(self):
-		return dict(js=["js/Locbit.js"])
+		return dict(js=["js/SD3D.js"])
 
         def _auto_print(self, file_info):
 
@@ -746,12 +746,12 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
                         self._auto_print(payload)
                         self._download_best_profile()
                         
-		if event in locbitMsgDict:
+		if event in sd3dMsgDict:
 			event_body = {
 				'uid' : uid,
 				'did' : did,
-				'event' : locbitMsgDict[event]['name'],
-				'status' : locbitMsgDict[event]['value']
+				'event' : sd3dMsgDict[event]['name'],
+				'status' : sd3dMsgDict[event]['value']
 			}
 		elif event == 'FileSelected':
 			event_body = {
@@ -781,9 +781,9 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
 		try:
 			requests.post(url, data = event_body)
 		except BadStatusLine:
-			self._logger.info("Locbit: Bad Status")
+			self._logger.info("SD3D: Bad Status")
 
-		self._logger.info("Locbit: Recording event " + event)
+		self._logger.info("SD3D: Recording event " + event)
 
 	def sendLayerStatus(self, layer):
 		global uid
@@ -800,7 +800,7 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
 		try:
 			requests.post(url, data = event_body)
 		except BadStatusLine:
-			self._logger.info("Locbit: Bad Status")
+			self._logger.info("SD3D: Bad Status")
 
 	def checkPrinterStatus(self):
 		url = "http://localhost/api/printer"
@@ -810,8 +810,8 @@ class LocbitPlugin(octoprint.plugin.StartupPlugin,
 			r = requests.get(url,  headers = { "X-Api-Key" : apiKey })
 			self._logger.info(r.text)
 		except BadStatusLine:
-			self._logger.info("Locbit: Bad Status")
+			self._logger.info("SD3D: Bad Status")
 
 
-__plugin_name__ = "Locbit"
-__plugin_implementation__ = LocbitPlugin()
+__plugin_name__ = "SD3D"
+__plugin_implementation__ = SD3DPlugin()

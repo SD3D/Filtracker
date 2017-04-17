@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 import octoprint.util
 
-locbitMsgDict = {
+sd3dMsgDict = {
 	'Connected' : {
 		'name' : 'PrinterStatus',
 		'value' : 'Connected'

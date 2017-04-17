@@ -1,11 +1,11 @@
 /*
- * View model for OctoPrint-Locbit
+ * View model for OctoPrint-SD3D
  *
  * Author: Brandon Herbert
  * License: AGPLv3
  */
 $(function() {
-    function LocbitViewModel(parameters) {
+    function SD3DViewModel(parameters) {
         var printerState = parameters[0];
         var settingsState = parameters[1];
         var filesState = parameters[2];
@@ -13,7 +13,7 @@ $(function() {
         var self = this;
 
         self.onDataUpdaterPluginMessage = function(plugin, data) {
-            if (plugin != "Locbit") {
+            if (plugin != "SD3D") {
 				// console.log('Ignoring '+plugin);
                 return;
             }
@@ -40,7 +40,7 @@ $(function() {
 
             $.ajax({
                 type: "GET",
-                url: "/api/plugin/Locbit",
+                url: "/api/plugin/SD3D",
                 success: function(data) {
                     // $('#material').html(data);
                   if (data.hasOwnProperty('result')){
@@ -49,8 +49,8 @@ $(function() {
                                                 
                         setQRData(data.result);
 
-                        if (data.hasOwnProperty('locbit_error')){
-                            alert("WARNING - remote locbit connection error: " + data.locbit_error);
+                        if (data.hasOwnProperty('sd3d_error')){
+                            alert("WARNING - remote sd3d connection error: " + data.sd3d_error);
                         }
                         else{
                             new PNotify({
@@ -79,7 +79,7 @@ $(function() {
            return $.ajax({
                           type: "GET",
                           async: false,
-                          url: "/api/plugin/Locbit?settings=1",
+                          url: "/api/plugin/SD3D?settings=1",
                           success: function(data) {
                           // $('#material').html(data);
                           if (data.hasOwnProperty('result')){
@@ -138,7 +138,7 @@ $(function() {
         }
 
 
-        function locbitLoadFile(file, printAfterLoad){
+        function sd3dLoadFile(file, printAfterLoad){
             
             if (!file) {
                 return;
@@ -151,15 +151,15 @@ $(function() {
 
         }
 
-        function locbitFilesUploadDoneWrap(handleUploadFunc){
+        function sd3dFilesUploadDoneWrap(handleUploadFunc){
             
-            locbitFilesUploadDone = function(e, data){
+            sd3dFilesUploadDone = function(e, data){
                                         handleUploadFunc(e, data);
 
                                         $.ajax({
                                                 type: "GET",
                                                 async: false,
-                                                url: "/api/plugin/Locbit?autoprint_setting=1",
+                                                url: "/api/plugin/SD3D?autoprint_setting=1",
                                                 success: function(data) {
                                                 if (data.hasOwnProperty('result')){
                                                     if(data.result === true){
@@ -175,7 +175,7 @@ $(function() {
                                         }});
                                        }
 
-            return locbitFilesUploadDone;
+            return sd3dFilesUploadDone;
         }
         
 
@@ -193,8 +193,8 @@ $(function() {
                 element.before(text3 + ": <strong id='length'></strong><br>");
                 element.before(text4 + ": <strong id='muid'></strong><br>");
 
-                filesState.loadFile = locbitLoadFile;
-                filesViewModel._handleUploadDone = locbitFilesUploadDoneWrap(filesViewModel._handleUploadDone)
+                filesState.loadFile = sd3dLoadFile;
+                filesViewModel._handleUploadDone = sd3dFilesUploadDoneWrap(filesViewModel._handleUploadDone)
                 
             }
 
@@ -231,7 +231,7 @@ $(function() {
 
     // view model class, parameters for constructor, container to bind to
     OCTOPRINT_VIEWMODELS.push([
-        LocbitViewModel,
+        SD3DViewModel,
         ["printerStateViewModel", "settingsViewModel", "gcodeFilesViewModel", "filesViewModel"],
         []
     ]);

@@ -1,30 +1,7 @@
-# OctoPrint-Locbit
+# OctoPrint-SD3D
 
-Locbit Octoprint integration.
-
-## Setup
+SD3D Octoprint integration.
 
 Install manually using this URL:
 
-    https://github.com/Locbit/OctoPrint-Locbit/archive/qr-code.zip
-
-Requires the following ssh commands to work
-
-    sudo apt-get update
-    sudo apt-get install ipython python-opencv python-scipy python-numpy python-setuptools python-pip python-pygame
-    sudo pip install svgwrite https://github.com/sightmachine/SimpleCV/zipball/master timeout-decorator
-    sudo apt-get install python-zbar
-    chmod +x ~/oprint/lib/python2.7/site-packages/octoprint_Locbit/qr.py
-
-Must add these directives to the configuration file /home/pi/.octoprint/config.yaml (top level directives folder and slicing might already exist):
-
-```
-folder:
-  slicingProfiles: /home/pi/.octoprint/slicingProfiles
-
-slicing:
-  defaultSlicer: cura 
-```
-
-Then restart OctoPrint
-
+    https://github.com/dissipate/Octoprint-SD3D/archive/sd3d-develop.zip 
