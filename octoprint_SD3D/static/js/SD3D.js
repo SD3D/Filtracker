@@ -237,6 +237,6 @@ $(function() {
     OCTOPRINT_VIEWMODELS.push([
         SD3DViewModel,
         ["printerStateViewModel", "settingsViewModel", "gcodeFilesViewModel", "filesViewModel"],
-        []
+        ["#wizard_plugin_SD3D"]
     ]);
 });
