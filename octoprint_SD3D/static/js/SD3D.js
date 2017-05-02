@@ -34,7 +34,7 @@ $(function() {
             $('#muid').html(qr_data.muid);
         }
 
-        function installDeps(){
+        self.function installDeps(){
             alert("install deps goes here");
         }
 
