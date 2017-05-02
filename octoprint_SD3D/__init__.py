@@ -839,8 +839,5 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
                 
                 print('5' * 20 + "{},{},{}".format(self._settings.get(['sd3dAPIKey']), self._settings.get(['sd3dAccessID']), self._settings.get(['sd3dAccessID'])))
 
-        def on_wizard_finish(self, handled):
-                if handled:
-                        self.install_dependencies()
 __plugin_name__ = "SD3D"
 __plugin_implementation__ = SD3DPlugin()
