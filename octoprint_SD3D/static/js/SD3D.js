@@ -34,6 +34,10 @@ $(function() {
             $('#muid').html(qr_data.muid);
         }
 
+        function installDeps(){
+            alert("install deps goes here");
+        }
+
         function apiFetch() {
 
             $('#qr-btn').prop('disabled', true);
