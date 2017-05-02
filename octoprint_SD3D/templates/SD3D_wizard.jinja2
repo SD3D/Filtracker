@@ -1,5 +1,6 @@
 <form class="form-horizontal">
    <div class="control-group">
         {% include "snippets/settings/SD3D/sd3d.jinja2" %}
+         <button class="btn btn-block" id="install-btn" data-bind="click: function() { alert("install goes here"); }">{{ _("Install Dependency Packages") }}</button>
    </div>
 </form>
