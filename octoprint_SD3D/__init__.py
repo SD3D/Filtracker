@@ -278,8 +278,12 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
                         
                         for qr_data_key in ['material', 'diameter', 'color', 'length', 'muid']:
                                 return_result[qr_data_key] = self._settings.get([qr_data_key])
-                        
-                        return_result['length'] = "{0:.3f}".format(float(return_result['length']))
+                       
+                        try:
+                                return_result['length'] = "{0:.3f}".format(float(return_result['length']))
+                        except Exception as e:
+                                self._logger.info('Could not return length')
+                                
                         return flask.jsonify(result=return_result)
 
                 if request.args.get('autoprint_setting') == '1':
