@@ -35,9 +35,22 @@ $(function() {
         }
 
         self.installDeps = function() {
-            alert("install deps goes here");
-        }
+            $.ajax({
+                    type: "GET",
+                    async: true,
+                    url: "/api/plugin/SD3D?install=1",
+                    success: function(data) {
+                                             if (data.hasOwnProperty('result')){
+                                                   alert("Install completed successfully");
+                                                }
 
+                                                else if (data.hasOwnProperty('error')){
+
+                                                         alert("Error: " + data.error);
+                                                }
+                                        }});
+        }
+ 
         function apiFetch() {
 
             $('#qr-btn').prop('disabled', true);

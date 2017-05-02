@@ -271,6 +271,13 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
                 
 
 	def on_api_get(self, request):
+
+                if request.args.get('install') == '1':
+                        try:
+                                self.install_dependencies()
+                                return flask.jsonify(result='')
+                        except Exception as e:
+                                return flask.jsonify(error=str(e)) 
                 
                 if request.args.get('settings') == '1':
                         
