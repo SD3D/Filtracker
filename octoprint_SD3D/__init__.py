@@ -604,7 +604,7 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
 
 	def on_after_startup(self):
                 from uuid import getnode as get_mac
-                self._logger.info("MAC: {}".format(get_mac))
+                self._logger.info("MAC: {}".format(get_mac()))
 		self._logger.info("Hello world! I am: %s" % self._settings.get(["did"]))
                 
                 def slice_monkey_patch_gen(slice_func):
