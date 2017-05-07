@@ -86,15 +86,15 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
 
                 response_data = response.json()
 
-                if 'measurements' in response_data:
-                        length = response_data['measurements']['Length']['status']
+                if 'measurements' in response_data and 'Length' in response_data['measurements']:
+                        length = response_data['measurements']['Length'].get('status')
                         return length
                 elif 'success' in response_data and \
                       not response_data['success'] and \
                       response_data['message'] == 'Device is not found':
                         return None
                 else:
-                        raise Exception("Spool length lookup failed, uknown error. Response: {}".format(str(response_data)))
+                      return None
 
         def _get_spool_settings(self):
 
@@ -112,7 +112,7 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
 
         def _get_printer_job_info(self):
                 job_uri = 'http://localhost/api/job'
-                octoprint_api_key = self._settings.get(["apiKey"])
+                octoprint_api_key = settings().get(['api', 'key']) 
        
                 assert octoprint_api_key is not None and len(octoprint_api_key) > 0
 
@@ -123,7 +123,7 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
 
         def _get_slice_profile(self, slicer, slice_profile_name):
                 profile_uri = "http://localhost/api/slicing/{}/profiles/{}".format(slicer, slice_profile_name)
-                octoprint_api_key = self._settings.get(["apiKey"])
+                octoprint_api_key = settings().get(['api', 'key']) 
 
                 assert octoprint_api_key is not None and len(octoprint_api_key) > 0
 
@@ -134,7 +134,7 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
 
         def _get_printer_profile(self, printer_profile_id):
                 profile_uri = "http://localhost/api/printerprofiles"
-                octoprint_api_key = self._settings.get(["apiKey"])
+                octoprint_api_key = settings().get(['api', 'key']) 
 
                 assert octoprint_api_key is not None and len(octoprint_api_key) > 0
 
@@ -146,7 +146,7 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
 
         def _get_current_printer_profile(self):
                 profile_uri = "http://localhost/api/printerprofiles"
-                octoprint_api_key = self._settings.get(["apiKey"])
+                octoprint_api_key = settings().get(['api', 'key']) 
 
                 assert octoprint_api_key is not None and len(octoprint_api_key) > 0
 
@@ -160,7 +160,7 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
 
         def _get_default_slice_profile(self, slicer):
                 profile_uri = "http://localhost/api/slicing/{}/profiles".format(slicer)
-                octoprint_api_key = self._settings.get(["apiKey"])
+                octoprint_api_key = settings().get(['api', 'key']) 
 
                 assert octoprint_api_key is not None and len(octoprint_api_key) > 0
 
@@ -174,7 +174,7 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
 
         def _get_local_file_metadata(self, local_file_name):
                 local_file_uri = "http://localhost/api/files/local/{}".format(urllib.quote_plus(local_file_name))
-                octoprint_api_key = self._settings.get(["apiKey"])
+                octoprint_api_key = settings().get(['api', 'key']) 
 
                 assert octoprint_api_key is not None and len(octoprint_api_key) > 0
 
@@ -186,7 +186,7 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
 
         def _get_current_job(self):
                 job_uri = "http://localhost/api/job"
-                octoprint_api_key = self._settings.get(["apiKey"])
+                octoprint_api_key = settings().get(['api', 'key']) 
 
                 assert octoprint_api_key is not None and len(octoprint_api_key) > 0
 
@@ -535,7 +535,7 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
 
         def _upload_new_profile(self, profile):
                 profile_uri = "http://localhost/api/slicing/cura/profiles/{}".format(profile['key'])
-                octoprint_api_key = self._settings.get(["apiKey"])
+                octoprint_api_key = settings().get(['api', 'key']) 
 
                 assert octoprint_api_key is not None and len(octoprint_api_key) > 0
 
@@ -587,10 +587,50 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
 
                 self._logger.info('PROFILE ASSOCIATION RESPONSE' * 3 + str(response))
 
+        def _auto_provision_printer(self):
+                sd3d_api_key = self._settings.get(['sd3dAPIKey'])
+                sd3d_access_id = self._settings.get(['sd3dAccessID'])
+
+                query_params = {'api': sd3d_api_key, 'access': sd3d_access_id}
+                did = self._settings.get(['did'])
+                lid = self._settings.get(['macAddress'])
+
+                provision_post_data = json.dumps({
+                                                  'translator': 'SD3DPrinter',
+                                                  'DeviceName': did,
+                                                  'lid': lid,
+                                                  'deviceDescriptionId': '559aeaf5d763cb2a02bb196d',
+                                                  'locationId': '13',
+                                                  'userId': '116'})
+
+                self._logger.info('PRINTER AUTO PROVISION REQUEST' * 3 + str(provision_post_data))
+
+                response = requests.post('https://test-api.locbit.com/provision', params=query_params, headers={'Content-Type': 'application/json'}, data=provision_post_data).json()
+
+                self._logger.info('PRINTER AUTO PROVISION RESPONSE' * 3 + str(response))
+
+                if 'success' in response and response['success']:
+
+                        provision_did = response['message']['did']
+
+                        activation_post_data = json.dumps({'did': provision_did,
+                                                           'connectivity': True,
+                                                           'services': True
+                                                          })
+                        
+                        self._logger.info('PRINTER ACTIVATION REQUEST' * 3 + str(activation_post_data))
+
+                        activate_response = requests.post('https://dev-billing.locbit.com/charge', params=query_params, headers={'Content-Type': 'application/json'}, data=activation_post_data).json()
+
+                        self._logger.info('PRINTER ACTIVATION RESPONSE' * 3 + str(activate_response))
+
+
         def install_dependencies(self):
                 import subprocess
+                from uuid import getnode as get_mac
                 settings().set(['folder', 'slicingProfiles'], '/home/pi/.octoprint/slicingProfiles')
                 settings().set(['slicing', 'defaultSlicer'], 'cura', force=True)
+                octoprint.plugin.SettingsPlugin.on_settings_save(self, {'macAddress': get_mac()})
 
                 commands = ['/usr/bin/apt-get update',
                             '/usr/bin/apt-get install -y ipython python-opencv python-scipy python-numpy python-setuptools python-pip python-pygame python-zbar',
@@ -605,8 +645,13 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
 	def on_after_startup(self):
                 from uuid import getnode as get_mac
                 self._logger.info("MAC: {}".format(get_mac()))
+                current_printer_name = self._get_current_printer_profile()['id']
+                octoprint.plugin.SettingsPlugin.on_settings_save(self, {'did': current_printer_name})
+
 		self._logger.info("Hello world! I am: %s" % self._settings.get(["did"]))
-                
+
+                self._auto_provision_printer()
+ 
                 def slice_monkey_patch_gen(slice_func):
                         def slice_monkey_patch(*args, **kwargs):
 
@@ -652,21 +697,22 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
                 octoprint.slicing.SlicingManager.slice = slice_monkey_patch_gen(octoprint.slicing.SlicingManager.slice)
 
 	def get_settings_defaults(self):
-		return dict(did="TEST_PRINTER",
+		return dict(did='',
                             material='',
                             diameter='',
                             color='',
                             initial_length='',
                             length='',
                             muid='',
-                            sd3dAPIKey='',
-                            sd3dAccessID='',
+                            sd3dAPIKey='yCX9PgjsvzGuaKTT9yuUIJFehPHjMknU',
+                            sd3dAccessID='DxM7QlAsDo43Z0SJW1qwLh4FBXGQlaGU',
                             jobProgress='',
                             layerHeight='',
                             sharingMode=False,
                             cloudMode=False,
                             autoPrintMode=False,
-                            fillDensity='20',
+                            macAddress='',
+                            fillDensity='20'
                             )
 
 	def get_template_configs(self):
@@ -698,7 +744,7 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
 
                 if file_name.lower().endswith('.stl') and file_target == 'local':
                         auto_print_uri = "http://localhost/api/files/local/{}".format(urllib.quote_plus(file_path))
-                        octoprint_api_key = self._settings.get(["apiKey"])
+                        octoprint_api_key = settings().get(['api', 'key']) 
 
                         #default_slice_profile_name = self._get_default_slice_profile('cura')['key']
                         default_slice_profile_name = self._get_default_slice_profile('cura')
@@ -818,7 +864,7 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
 
 	def checkPrinterStatus(self):
 		url = "http://localhost/api/printer"
-		apiKey = self._settings.get(["apiKey"])
+		apiKey = settings().get(['api', 'key']) 
 
 		try:
 			r = requests.get(url,  headers = { "X-Api-Key" : apiKey })
@@ -828,16 +874,12 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
         
         def is_wizard_required(self):
 
-                api_key = self._settings.get(['sd3dAPIKey'])
-                access_id = self._settings.get(['sd3dAccessID'])
+                mac_address = self._settings.get(['macAddress'])
 
-                if api_key is None or access_id is None:
+                if mac_address is None:
                         return True
 
-                if len(api_key) == 0 or len(access_id) == 0:
-                        return True
-                
-                print('5' * 20 + "{},{},{}".format(self._settings.get(['sd3dAPIKey']), self._settings.get(['sd3dAccessID']), self._settings.get(['sd3dAccessID'])))
+                print('5' * 20 + "{}".format(self._settings.get(['macAddress'])))
 
 __plugin_name__ = "SD3D"
 __plugin_implementation__ = SD3DPlugin()
