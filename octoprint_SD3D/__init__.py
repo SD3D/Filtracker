@@ -876,7 +876,7 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
 
                 mac_address = self._settings.get(['macAddress'])
 
-                if mac_address is None:
+                if not mac_address:
                         return True
 
                 print('5' * 20 + "{}".format(self._settings.get(['macAddress'])))
