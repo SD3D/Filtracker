@@ -881,5 +881,5 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
 
                 print('5' * 20 + "{}".format(self._settings.get(['macAddress'])))
 
-__plugin_name__ = "SD3D"
+__plugin_name__ = "Filtracker"
 __plugin_implementation__ = SD3DPlugin()
