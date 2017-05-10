@@ -24,7 +24,7 @@ plugin_description = """Connect 3D printers to SD3D servers."""
 plugin_author = "SD3D"
 
 # The plugin's author's mail address.
-plugin_author_email = "skane@locbit.com"
+plugin_author_email = "david@sd3d.com"
 
 # The plugin's homepage URL. Can be overwritten within OctoPrint's internal data via __plugin_url__ in the plugin module
 plugin_url = "http://www.sd3d.com/filtracker-manual/"
