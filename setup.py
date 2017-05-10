@@ -21,13 +21,13 @@ plugin_version = "0.1.0"
 plugin_description = """Connect 3D printers to SD3D servers."""
 
 # The plugin's author. Can be overwritten within OctoPrint's internal data via __plugin_author__ in the plugin module
-plugin_author = "Brandon Herbert"
+plugin_author = "SD3D"
 
 # The plugin's author's mail address.
 plugin_author_email = "skane@locbit.com"
 
 # The plugin's homepage URL. Can be overwritten within OctoPrint's internal data via __plugin_url__ in the plugin module
-plugin_url = "www.sd3d.com"
+plugin_url = "http://www.sd3d.com/filtracker-manual/"
 
 # The plugin's license. Can be overwritten within OctoPrint's internal data via __plugin_license__ in the plugin module
 plugin_license = "AGPLv3"
