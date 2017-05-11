@@ -1,6 +1,6 @@
-# OctoPrint-Locbit
+# OctoPrint-SD3D
 
-Locbit Octoprint integration.
+SD3D Octoprint integration.
 
 ## Setup
 
