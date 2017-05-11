@@ -1,10 +1,12 @@
-# OctoPrint-SD3D
+# Filtracker
 
-SD3D Octoprint integration.
+An Octoprint plugin to help track material inventory and optimize print settings in the cloud.
 
 ## Setup
 
-Install via the bundled [Plugin Manager](https://github.com/foosel/OctoPrint/wiki/Plugin:-Plugin-Manager)
-or manually using this URL:
+Full instructions: [Full User Manual](https://github.com/SD3D/Filtracker/wiki)
 
-    https://github.com/Locbit/OctoPrint-Locbit/archive/master.zip
+Install via the bundled [Plugin Manager](https://github.com/foosel/OctoPrint/wiki/Plugin:-Plugin-Manager)
+using this URL:
+
+    https://github.com/SD3D/Filtracker/archive/sd3d-develop.zip
