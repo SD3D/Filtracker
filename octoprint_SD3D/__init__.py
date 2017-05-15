@@ -639,7 +639,7 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
                         assert fill_density_percentage > 0 and fill_density_percentage <= 100
                         octoprint.plugin.SettingsPlugin.on_settings_save(self, {'fillDensity': fill_density})
                 except Exception as e:
-                        raise Exception("Fill density setting {} is invalid, must be percentage (integer)".format(fill_density)))
+                        raise Exception("Fill density setting {} is invalid, must be percentage (integer)".format(fill_density))
 
                 commands = ['/usr/bin/apt-get update',
                             '/usr/bin/apt-get install -y ipython python-opencv python-scipy python-numpy python-setuptools python-pip python-pygame python-zbar',
