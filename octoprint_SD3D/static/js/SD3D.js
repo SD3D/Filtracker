@@ -37,11 +37,12 @@ $(function() {
         self.installDeps = function() {
             
             $('#install-btn').prop('disabled', true);
+            var install_url = "/api/plugin/SD3D?install=1&fill=" + $("#fillPercentInstall").val(); 
 
             $.ajax({
                     type: "GET",
                     async: true,
-                    url: "/api/plugin/SD3D?install=1",
+                    url: install_url,
                     success: function(data) {
                                              if (data.hasOwnProperty('result')){
                                                    alert("Install completed successfully");

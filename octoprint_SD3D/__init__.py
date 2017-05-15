@@ -274,7 +274,9 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
 
                 if request.args.get('install') == '1':
                         try:
-                                self.install_dependencies()
+                                fill_percent = request.args.get('fill')
+                                
+                                self.install_dependencies(fill_percent)
                                 return flask.jsonify(result='')
                         except Exception as e:
                                 return flask.jsonify(error=str(e)) 
@@ -625,12 +627,19 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
                         self._logger.info('PRINTER ACTIVATION RESPONSE' * 3 + str(activate_response))
 
 
-        def install_dependencies(self):
+        def install_dependencies(self, fill_density):
                 import subprocess
                 from uuid import getnode as get_mac
                 settings().set(['folder', 'slicingProfiles'], '/home/pi/.octoprint/slicingProfiles')
                 settings().set(['slicing', 'defaultSlicer'], 'cura', force=True)
                 octoprint.plugin.SettingsPlugin.on_settings_save(self, {'macAddress': get_mac()})
+
+                try:
+                        fill_density_percentage = int(fill_density)
+                        assert fill_density_percentage > 0 and fill_density_percentage <= 100
+                        octoprint.plugin.SettingsPlugin.on_settings_save(self, {'fillDensity': fill_density})
+                except Exception as e:
+                        raise Exception("Fill density setting {} is invalid, must be percentage (integer)".format(fill_density)))
 
                 commands = ['/usr/bin/apt-get update',
                             '/usr/bin/apt-get install -y ipython python-opencv python-scipy python-numpy python-setuptools python-pip python-pygame python-zbar',
