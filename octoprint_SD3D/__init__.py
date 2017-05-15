@@ -716,10 +716,10 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
                             sd3dAPIKey='yCX9PgjsvzGuaKTT9yuUIJFehPHjMknU',
                             sd3dAccessID='DxM7QlAsDo43Z0SJW1qwLh4FBXGQlaGU',
                             jobProgress='',
-                            layerHeight='',
+                            layerHeight='0.25',
                             sharingMode=True,
-                            cloudMode=False,
-                            autoPrintMode=False,
+                            cloudMode=True,
+                            autoPrintMode=True,
                             macAddress='',
                             fillDensity='20'
                             )
