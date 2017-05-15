@@ -35,6 +35,9 @@ $(function() {
         }
 
         self.installDeps = function() {
+            
+            $('#install-btn').prop('disabled', true);
+
             $.ajax({
                     type: "GET",
                     async: true,
@@ -45,7 +48,7 @@ $(function() {
                                                 }
 
                                                 else if (data.hasOwnProperty('error')){
-
+                                                         $('#install-btn').prop('disabled', false);
                                                          alert("Error: " + data.error);
                                                 }
                                         }});
