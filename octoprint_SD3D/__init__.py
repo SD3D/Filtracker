@@ -24,7 +24,7 @@ url = "https://test-api.locbit.com/endpoint"
 status_url = 'https://test-api.locbit.com/statusByLid'
 
 HTTP_REQUEST_TIMEOUT=50
-LAYER_HEIGHT_THRESHOLD=0.25
+LAYER_HEIGHT_THRESHOLD=0.1
 
 class SD3DPlugin(octoprint.plugin.StartupPlugin,
 			octoprint.plugin.TemplatePlugin,
