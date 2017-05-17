@@ -656,6 +656,12 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
                 self._logger.info("MAC: {}".format(get_mac()))
                 current_printer_name = self._get_current_printer_profile()['id']
                 octoprint.plugin.SettingsPlugin.on_settings_save(self, {'did': current_printer_name})
+		
+		current_printer_oem = self._get_current_printer_profile()['name']
+                octoprint.plugin.SettingsPlugin.on_settings_save(self, {'oem': current_printer_oem})
+		
+		current_printer_model = self._get_current_printer_profile()['model']
+                octoprint.plugin.SettingsPlugin.on_settings_save(self, {'model': current_printer_model})
 
 		self._logger.info("Hello world! I am: %s" % self._settings.get(["did"]))
 
@@ -707,6 +713,8 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
 
 	def get_settings_defaults(self):
 		return dict(did='',
+			    oem='',
+			    model='',
                             material='',
                             diameter='',
                             color='',
