@@ -1,41 +1,38 @@
-<label class="control-label">{{ _('SD3D Api Key') }}</label>
-<div class="controls">
-    <input type="text" class="input-block-level" data-bind="value: settings.plugins.SD3D.sd3dAPIKey" disabled>
+<h3>{{ _('Filtracker') }}</h3>
+<div class="control-group">
+    <div class="controls">
+        <label class="checkbox">
+            <input type="checkbox" data-bind="checked: settings.plugins.SD3D.cloudMode"> {{ _('Enable material profile optimization (Cloud Mode)') }}
+        </label>
+    </div>
 </div>
-<label class="control-label">{{ _('SD3D Access ID') }}</label>
-<div class="controls">
-    <input type="text" class="input-block-level" data-bind="value: settings.plugins.SD3D.sd3dAccessID" disabled>
+<div class="control-group">
+    <div class="controls">
+        <label class="checkbox">
+            <input type="checkbox" data-bind="checked: settings.plugins.SD3D.autoPrintMode"> {{ _('Enable automatic slicing and printing of STL files (AutoPrint Mode)') }}
+        </label>
+    </div>
 </div>
-<label class="control-label">{{ _('Device MAC Address') }}</label>
-<div class="controls">
-    <input type="text" class="input-block-level" data-bind="value: settings.plugins.SD3D.macAddress" disabled>
-</div>
-<label class="control-label">{{ _('Layer Height in mm') }}</label>
+<h4>{{ _('AutoPrint Settings') }}</h4>
+<label class="control-label">{{ _('Layer Height (mm)') }}</label>
 <div class="controls">
     <input type="text" class="input-block-level" data-bind="value: settings.plugins.SD3D.layerHeight">
 </div>
-<label class="control-label">{{ _('Fill density percentage (1-100)') }}</label>
+<label class="control-label">{{ _('Infill percentage (1-100)') }}</label>
 <div class="controls">
     <input type="text" class="input-block-level" data-bind="value: settings.plugins.SD3D.fillDensity">
 </div>
-<div class="control-group">
-    <div class="controls">
-        <label class="checkbox">
-            <input type="checkbox" data-bind="checked: settings.plugins.SD3D.sharingMode"> {{ _('Enable information sharing with SD3D (Sharing Mode)') }}
-        </label>
-    </div>
+<label class="control-label">{{ _(' ') }}</label>
+<h4>{{ _('Cloud Mode API') }}</h4>
+<label class="control-label">{{ _('SD3D API Key') }}</label>
+<div class="controls">
+    <input type="text" class="input-block-level" data-bind="value: settings.plugins.SD3D.sd3dAPIKey" disabled>
 </div>
-<div class="control-group">
-    <div class="controls">
-        <label class="checkbox">
-            <input type="checkbox" data-bind="checked: settings.plugins.SD3D.cloudMode"> {{ _('Enable downloading of profiles from SD3D (Cloud Mode)') }}
-        </label>
-    </div>
+<label class="control-label">{{ _('Access ID') }}</label>
+<div class="controls">
+    <input type="text" class="input-block-level" data-bind="value: settings.plugins.SD3D.sd3dAccessID" disabled>
 </div>
-<div class="control-group">
-    <div class="controls">
-        <label class="checkbox">
-            <input type="checkbox" data-bind="checked: settings.plugins.SD3D.autoPrintMode"> {{ _('Enable automatic slicing and printing of uploaded STL files') }}
-        </label>
-    </div>
+<label class="control-label">{{ _('Device ID') }}</label>
+<div class="controls">
+    <input type="text" class="input-block-level" data-bind="value: settings.plugins.SD3D.macAddress" disabled>
 </div>
