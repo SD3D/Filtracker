@@ -1,3 +1,28 @@
+<h3>{{ _('General') }}</h3>
+<div class="control-group">
+    <div class="controls">
+        <label class="checkbox">
+            <input type="checkbox" data-bind="checked: settings.plugins.SD3D.cloudMode"> {{ _('Enable material profile optimization (Cloud Mode)') }}
+        </label>
+    </div>
+</div>
+<div class="control-group">
+    <div class="controls">
+        <label class="checkbox">
+            <input type="checkbox" data-bind="checked: settings.plugins.SD3D.autoPrintMode"> {{ _('Enable automatic slicing and printing of STL files (AutoPrint Mode)') }}
+        </label>
+    </div>
+</div>
+<h3>{{ _('AutoPrint Mode') }}</h3>
+<label class="control-label">{{ _('Layer Height in mm') }}</label>
+<div class="controls">
+    <input type="text" class="input-block-level" data-bind="value: settings.plugins.SD3D.layerHeight">
+</div>
+<label class="control-label">{{ _('Infill percentage (1-100)') }}</label>
+<div class="controls">
+    <input type="text" class="input-block-level" data-bind="value: settings.plugins.SD3D.fillDensity">
+</div>
+<h3>{{ _('Cloud Mode') }}</h3>
 <label class="control-label">{{ _('SD3D Api Key') }}</label>
 <div class="controls">
     <input type="text" class="input-block-level" data-bind="value: settings.plugins.SD3D.sd3dAPIKey" disabled>
@@ -9,26 +34,4 @@
 <label class="control-label">{{ _('Device MAC Address') }}</label>
 <div class="controls">
     <input type="text" class="input-block-level" data-bind="value: settings.plugins.SD3D.macAddress" disabled>
-</div>
-<label class="control-label">{{ _('Layer Height in mm') }}</label>
-<div class="controls">
-    <input type="text" class="input-block-level" data-bind="value: settings.plugins.SD3D.layerHeight">
-</div>
-<label class="control-label">{{ _('Infill percentage (1-100)') }}</label>
-<div class="controls">
-    <input type="text" class="input-block-level" data-bind="value: settings.plugins.SD3D.fillDensity">
-</div>
-<div class="control-group">
-    <div class="controls">
-        <label class="checkbox">
-            <input type="checkbox" data-bind="checked: settings.plugins.SD3D.cloudMode"> {{ _('Enable material profile optimization (Cloud Mode)') }}
-        </label>
-    </div>
-</div>
-<div class="control-group">
-    <div class="controls">
-        <label class="checkbox">
-            <input type="checkbox" data-bind="checked: settings.plugins.SD3D.autoPrintMode"> {{ _('Enable automatic slicing and printing of uploaded STL files') }}
-        </label>
-    </div>
 </div>
