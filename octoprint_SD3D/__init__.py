@@ -599,7 +599,7 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
 
                 provision_post_data = json.dumps({
                                                   'translator': 'SD3DPrinter',
-                                                  'DeviceName': did,
+                                                  'DeviceName': lid,
                                                   'lid': lid,
                                                   'deviceDescriptionId': '559aeaf5d763cb2a02bb196d',
                                                   'locationId': '13',
