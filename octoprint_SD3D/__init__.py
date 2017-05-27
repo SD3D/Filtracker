@@ -598,8 +598,8 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
                 lid = self._settings.get(['macAddress'])
 		printer_oem = self._get_current_printer_profile()['name']
 		printer_model = self._get_current_printer_profile()['model']
-		pretxt = '3D Printer: '
-		posttxt = '(did: '
+		pretxt = 'Printer: '
+		posttxt = '('
 		closetxt = ')'
 		printer_dname = "%s %s %s %s %s %s" % (pretxt, printer_oem, printer_model, posttxt, lid, closetxt)
 
