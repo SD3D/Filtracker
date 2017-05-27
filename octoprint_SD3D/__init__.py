@@ -596,7 +596,10 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
                 query_params = {'api': sd3d_api_key, 'access': sd3d_access_id}
                 did = self._settings.get(['did'])
                 lid = self._settings.get(['macAddress'])
-		Dname = did + lid
+		printer_oem = self._get_current_printer_profile()['name']
+		printer_model = current_printer['model']
+		
+		Dname = 'Printer: {} {} did:{}' format(printer_oem, printer_model, lid)
 
                 provision_post_data = json.dumps({
                                                   'translator': 'SD3DPrinter',
