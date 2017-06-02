@@ -45,7 +45,7 @@ $(function() {
                     url: install_url,
                     success: function(data) {
                                              if (data.hasOwnProperty('result')){
-                                                   alert("Install completed successfully");
+                                                   alert("Install completed successfully. Click finish to proceed.");
                                                 }
 
                                                 else if (data.hasOwnProperty('error')){
@@ -71,12 +71,12 @@ $(function() {
                         setQRData(data.result);
 
                         if (data.hasOwnProperty('sd3d_error')){
-                            alert("WARNING - remote sd3d connection error: " + data.sd3d_error);
+                            alert("WARNING - " + data.sd3d_error);
                         }
                         else{
                             new PNotify({
-                                         title: 'QR code scanned',
-                                         text: 'QR code has been scanned'
+                                         title: 'QR code scan successful',
+                                         text: 'Material attributes have been updated'
                                        });
                         }
                     }
@@ -135,14 +135,14 @@ $(function() {
             estimated_length = file["gcodeAnalysis"]["filament"]["tool0"]["length"];
             
             if(!estimated_length){
-                alert("Estimated length unknown, must click 'Print' to override");
+                alert("Warning: Remaining filament length unknown. Scan a valid material QR code before proceeding to enable material tracking, or click 'Print' to override.");
                 return false;
             }
 
             qr_data_obj = getQRSettings().responseJSON.result;
 
             if((qr_data_obj === undefined) || (qr_data_obj === null)){
-                alert("Remaining length unknown, must click 'Print' to override");
+                alert("Warning: Remaining filament length unknown. Scan a valid material QR code before proceeding to enable material tracking, or click 'Print' to override.");
                 return false;
                 
             }
@@ -151,7 +151,7 @@ $(function() {
             estimated_length_float = parseFloat(estimated_length);
 
             if(remaining_length_float < (estimated_length_float / 1000)){
-                alert("Remaining length is less than estimated length, must click 'Print' to override")
+                alert("Warning: Remaining filament length is insufficient to complete this print. Click 'Print' to override.")
                 return false;
             }
 
@@ -227,7 +227,7 @@ $(function() {
          self.onEventPrintPaused = self.updateSettings;
          self.onPrintResumed = self.updateSettings;
 
-            var code = '<div class="jog-panel"> <!-- QR Code control panel --> <div class="jog-panel" id="scan-qr-code"> <h1>QR Code</h1><div> <button class="btn btn-block control-box" id="qr-btn" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { } ">Scan QR</button></div></div></div>';
+            var code = '<div class="jog-panel"> <!-- QR Code control panel --> <div class="jog-panel" id="scan-qr-code"> <h1>Material</h1><div> <button class="btn btn-block control-box" id="qr-btn" data-bind="enable: isOperational() && !isPrinting() && loginState.isUser(), click: function() { } ">Scan QR</button></div></div></div>';
 
             var controlElement = $("#control");
 
