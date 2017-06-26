@@ -298,8 +298,12 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
                 if request.args.get('autoprint_setting') == '1':
                         return flask.jsonify(result=self._settings.get(['autoPrintMode']))
                 
+		# grant permission to the file before execute it
+		commands = ['/bin/chmod +x /home/pi/oprint/lib/python2.7/site-packages/octoprint_SD3D/qr.py']
 		import subprocess
-   
+		for command in commands:
+                        subprocess.check_call("/bin/bash -c 'sudo {}'".format(command), shell=True)
+
                 qr_script_path = '/home/pi/oprint/lib/python2.7/site-packages/octoprint_SD3D/qr.py'
                 subprocess_args = [qr_script_path]
 
