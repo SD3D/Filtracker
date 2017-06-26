@@ -76,6 +76,7 @@ $(function() {
                         else{
                             new PNotify({
                                          title: 'QR code scan successful',
+				         type: 'success',
                                          text: 'Material attributes have been updated'
                                        });
                         }
