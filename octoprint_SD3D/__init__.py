@@ -611,7 +611,7 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
                                                   'translator': 'SD3DPrinter',
                                                   'DeviceName': printer_dname,
                                                   'lid': lid,
-                                                  'deviceDescriptionId': '559aeaf5d763cb2a02bb196d',
+                                                  'deviceDescriptionId': '56db96454a7a901f59815541',
                                                   'locationId': '13',
                                                   'userId': '116'})
 
