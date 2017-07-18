@@ -20,8 +20,8 @@ Layer = 0
 uid = "55de667a295efb62093205e4"
 # url = "http://192.168.0.34:3000"
 #url = "http://api.locbit.com:8888/endpoint"
-url = "https://test-api.locbit.com/endpoint"
-status_url = 'https://test-api.locbit.com/statusByLid'
+url = "https://api.locbit.com/endpoint"
+status_url = 'https://api.locbit.com/statusByLid'
 
 HTTP_REQUEST_TIMEOUT=50
 LAYER_HEIGHT_THRESHOLD=0.1
@@ -617,7 +617,7 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
 
                 self._logger.info('PRINTER AUTO PROVISION REQUEST' * 3 + str(provision_post_data))
 
-                response = requests.post('https://test-api.locbit.com/provision', params=query_params, headers={'Content-Type': 'application/json'}, data=provision_post_data).json()
+                response = requests.post('https://api.locbit.com/provision', params=query_params, headers={'Content-Type': 'application/json'}, data=provision_post_data).json()
 
                 self._logger.info('PRINTER AUTO PROVISION RESPONSE' * 3 + str(response))
 
@@ -632,7 +632,7 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
                         
                         self._logger.info('PRINTER ACTIVATION REQUEST' * 3 + str(activation_post_data))
 
-                        activate_response = requests.post('https://dev-billing.locbit.com/charge', params=query_params, headers={'Content-Type': 'application/json'}, data=activation_post_data).json()
+                        activate_response = requests.post('https://billing.locbit.com/charge', params=query_params, headers={'Content-Type': 'application/json'}, data=activation_post_data).json()
 
                         self._logger.info('PRINTER ACTIVATION RESPONSE' * 3 + str(activate_response))
 
