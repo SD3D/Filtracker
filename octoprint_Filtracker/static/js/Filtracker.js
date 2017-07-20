@@ -1,11 +1,8 @@
 /*
- * View model for OctoPrint-SD3D
- *
- * Author: Brandon Herbert
- * License: AGPLv3
+ * View model for OctoPrint-Filtracker
  */
 $(function() {
-    function SD3DViewModel(parameters) {
+    function FiltrackerViewModel(parameters) {
         var printerState = parameters[0];
         var settingsState = parameters[1];
         var filesState = parameters[2];
@@ -13,7 +10,7 @@ $(function() {
         var self = this;
 
         self.onDataUpdaterPluginMessage = function(plugin, data) {
-            if (plugin != "SD3D") {
+            if (plugin != "Filtracker") {
 				// console.log('Ignoring '+plugin);
                 return;
             }
@@ -37,7 +34,7 @@ $(function() {
         self.installDeps = function() {
             
             $('#install-btn').prop('disabled', true);
-            var install_url = "/api/plugin/SD3D?install=1&fill=" + $("#fillPercentInstall").val(); 
+            var install_url = "/api/plugin/Filtracker?install=1&fill=" + $("#fillPercentInstall").val(); 
 
             $.ajax({
                     type: "GET",
@@ -61,7 +58,7 @@ $(function() {
 
             $.ajax({
                 type: "GET",
-                url: "/api/plugin/SD3D",
+                url: "/api/plugin/Filtracker",
                 success: function(data) {
                     // $('#material').html(data);
                   if (data.hasOwnProperty('result')){
@@ -70,8 +67,8 @@ $(function() {
                                                 
                         setQRData(data.result);
 
-                        if (data.hasOwnProperty('sd3d_error')){
-                            alert("WARNING - " + data.sd3d_error);
+                        if (data.hasOwnProperty('Filtracker_error')){
+                            alert("WARNING - " + data.Filtracker_error);
                         }
                         else{
                             new PNotify({
@@ -101,7 +98,7 @@ $(function() {
            return $.ajax({
                           type: "GET",
                           async: false,
-                          url: "/api/plugin/SD3D?settings=1",
+                          url: "/api/plugin/Filtracker?settings=1",
                           success: function(data) {
                           // $('#material').html(data);
                           if (data.hasOwnProperty('result')){
@@ -160,7 +157,7 @@ $(function() {
         }
 
 
-        function sd3dLoadFile(file, printAfterLoad){
+        function FiltrackerLoadFile(file, printAfterLoad){
             
             if (!file) {
                 return;
@@ -173,15 +170,15 @@ $(function() {
 
         }
 
-        function sd3dFilesUploadDoneWrap(handleUploadFunc){
+        function FiltrackerFilesUploadDoneWrap(handleUploadFunc){
             
-            sd3dFilesUploadDone = function(e, data){
+            FiltrackerFilesUploadDone = function(e, data){
                                         handleUploadFunc(e, data);
 
                                         $.ajax({
                                                 type: "GET",
                                                 async: false,
-                                                url: "/api/plugin/SD3D?autoprint_setting=1",
+                                                url: "/api/plugin/Filtracker?autoprint_setting=1",
                                                 success: function(data) {
                                                 if (data.hasOwnProperty('result')){
                                                     if(data.result === true){
@@ -197,7 +194,7 @@ $(function() {
                                         }});
                                        }
 
-            return sd3dFilesUploadDone;
+            return FiltrackerFilesUploadDone;
         }
         
 
@@ -215,8 +212,8 @@ $(function() {
                 element.before(text3 + ": <strong id='length'></strong><br>");
                 element.before(text4 + ": <strong id='muid'></strong><br>");
 
-                filesState.loadFile = sd3dLoadFile;
-                filesViewModel._handleUploadDone = sd3dFilesUploadDoneWrap(filesViewModel._handleUploadDone)
+                filesState.loadFile = FiltrackerLoadFile;
+                filesViewModel._handleUploadDone = FiltrackerFilesUploadDoneWrap(filesViewModel._handleUploadDone)
                 
             }
 
@@ -253,8 +250,8 @@ $(function() {
 
     // view model class, parameters for constructor, container to bind to
     OCTOPRINT_VIEWMODELS.push([
-        SD3DViewModel,
+        FiltrackerViewModel,
         ["printerStateViewModel", "settingsViewModel", "gcodeFilesViewModel", "filesViewModel"],
-        ["#wizard_plugin_SD3D"]
+        ["#wizard_plugin_Filtracker"]
     ]);
 });

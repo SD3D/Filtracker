@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division
 from httplib import BadStatusLine
-from .sd3dNotifications import sd3dMsgDict
+from .FiltrackerNotifications import FiltrackerMsgDict
 
 import octoprint.plugin
 from octoprint.slicing import SlicingManager, UnknownProfile
@@ -20,13 +20,13 @@ Layer = 0
 uid = "55de667a295efb62093205e4"
 # url = "http://192.168.0.34:3000"
 #url = "http://api.locbit.com:8888/endpoint"
-url = "https://test-api.locbit.com/endpoint"
-status_url = 'https://test-api.locbit.com/statusByLid'
+url = "https://api.locbit.com/endpoint"
+status_url = 'https://api.locbit.com/statusByLid'
 
 HTTP_REQUEST_TIMEOUT=50
 LAYER_HEIGHT_THRESHOLD=0.1
 
-class SD3DPlugin(octoprint.plugin.StartupPlugin,
+class FiltrackerPlugin(octoprint.plugin.StartupPlugin,
 			octoprint.plugin.TemplatePlugin,
 			octoprint.plugin.SettingsPlugin,
 			octoprint.plugin.EventHandlerPlugin,
@@ -70,15 +70,15 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
 
         def _get_spool_length(self, muid):
 
-                sd3d_api_key = self._settings.get(['sd3dAPIKey'])
-                sd3d_access_id = self._settings.get(['sd3dAccessID'])
+                SD3D_api_key = self._settings.get(['SD3DAPIKey'])
+                SD3D_access_id = self._settings.get(['SD3DAccessID'])
 
-                if len(sd3d_api_key) == 0 or len(sd3d_access_id) == 0:
-                        raise Exception("Cannot get stored spool length, either sd3d api key or access ID is missing from settings")
+                if len(SD3D_api_key) == 0 or len(SD3D_access_id) == 0:
+                        raise Exception("Cannot get stored spool length, either Filtracker api key or access ID is missing from settings")
 
-                request_uri = "{}/{}/SD3DPrinter".format(status_url, muid)
+                request_uri = "{}/{}/FiltrackerPrinter".format(status_url, muid)
 
-                query_params = {'api': sd3d_api_key, 'access': sd3d_access_id} 
+                query_params = {'api': SD3D_api_key, 'access': SD3D_access_id} 
 
                 response = requests.get(request_uri, params=query_params, timeout=HTTP_REQUEST_TIMEOUT)
 
@@ -299,12 +299,12 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
                         return flask.jsonify(result=self._settings.get(['autoPrintMode']))
                 
 		# grant permission to the file before execute it
-		commands = ['/bin/chmod +x /home/pi/oprint/lib/python2.7/site-packages/octoprint_SD3D/qr.py']
+		commands = ['/bin/chmod +x /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/qr.py']
 		import subprocess
 		for command in commands:
                         subprocess.check_call("/bin/bash -c 'sudo {}'".format(command), shell=True)
 
-                qr_script_path = '/home/pi/oprint/lib/python2.7/site-packages/octoprint_SD3D/qr.py'
+                qr_script_path = '/home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/qr.py'
                 subprocess_args = [qr_script_path]
 
                 output = ''
@@ -361,13 +361,13 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
                                                self._post_spool_data(return_result)
 
                                except Exception as e:
-                                       return flask.jsonify(result=return_result, sd3d_error=str(e))
+                                       return flask.jsonify(result=return_result, Filtracker_error=str(e))
 
                                try:
                                        self._set_default_slice_profile(return_result['muid'][0:7])
 
                                except Exception as e:
-                                       return flask.jsonify(result=return_result, sd3d_error="Setting profile {} as default failed, check to see if it exists".format(return_result['muid']))
+                                       return flask.jsonify(result=return_result, Filtracker_error="Setting profile {} as default failed, check to see if it exists".format(return_result['muid']))
 
                                return_result['length'] = "{0:.3f}".format(float(return_result['length']))
 
@@ -420,18 +420,18 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
                 
                 self._logger.info('UPDATE' * 5 + str(profile_update_data))
                 
-                sd3d_info_share_event_uri = 'https://sd3d.locbit.com/event' 
+                Filtracker_info_share_event_uri = 'https://sd3d.locbit.com/event' 
 
-                sd3d_api_key = self._settings.get(['sd3dAPIKey'])
-                sd3d_access_id = self._settings.get(['sd3dAccessID'])
+                SD3D_api_key = self._settings.get(['SD3DAPIKey'])
+                SD3D_access_id = self._settings.get(['SD3DAccessID'])
 
-                if len(sd3d_api_key) == 0 or len(sd3d_access_id) == 0:
+                if len(SD3D_api_key) == 0 or len(SD3D_access_id) == 0:
                         self._logger.error("No API key or access key in settings. Skipping stat update")
                         return
 
-                query_params = {'api': sd3d_api_key, 'access': sd3d_access_id}
+                query_params = {'api': SD3D_api_key, 'access': SD3D_access_id}
 
-                response = requests.post(sd3d_info_share_event_uri, params=query_params, headers={'Content-Type': 'application/json'}, data=profile_update_data).json()
+                response = requests.post(Filtracker_info_share_event_uri, params=query_params, headers={'Content-Type': 'application/json'}, data=profile_update_data).json()
 
                 self._logger.info('EVENT STAT RESPONSE' * 3 + str(response))
  
@@ -471,7 +471,7 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
 
                 if best_profile['success']:
                         print("best profile data:" + str(best_profile))
-                        best_profile['data']['slicing_profile']['key'] = 'SD3D' + best_profile['data']['slicing_profile']['key']
+                        best_profile['data']['slicing_profile']['key'] = 'Filtracker' + best_profile['data']['slicing_profile']['key']
 
                         best_profile['data']['slicing_profile']['default'] = False
 
@@ -508,8 +508,8 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
                 #printer_make = urllib.quote(printer_make)
                 #printer_model = urllib.quote(printer_model)
 
-                sd3d_api_key = self._settings.get(['sd3dAPIKey'])
-                sd3d_access_id = self._settings.get(['sd3dAccessID'])
+                SD3D_api_key = self._settings.get(['SD3DAPIKey'])
+                SD3D_access_id = self._settings.get(['SD3DAccessID'])
 
                 query_data = {
                               'printer_make': printer_make,
@@ -519,21 +519,21 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
                               'layer_height': layer_height,
                               'layer_height_threshold': layer_height_threshold,
                               'material_diameter': material_diameter,
-                              'api': sd3d_api_key,
-                              'access': sd3d_access_id
+                              'api': SD3D_api_key,
+                              'access': SD3D_access_id
                              }
 
                 query_str = urllib.urlencode(query_data)
 
-                if len(sd3d_api_key) == 0 or len(sd3d_access_id) == 0:
+                if len(SD3D_api_key) == 0 or len(SD3D_access_id) == 0:
                        self._logger.error("No API key or access key in settings. Skipping getting best profile")
                        return 
 
-                sd3d_uri = 'https://sd3d.locbit.com/slicing_profile'
+                Filtracker_uri = 'https://sd3d.locbit.com/slicing_profile'
 
                 self._logger.info('GET BEST PROFILE REQUEST' * 3 + str(query_data))
 
-                response = requests.get(sd3d_uri, params=query_data)
+                response = requests.get(Filtracker_uri, params=query_data)
 
                 self._logger.info('GET BEST PROFILE RESPONSE' * 3 + str(response.json()) + str(response.url))
 
@@ -578,26 +578,26 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
  
                 self._logger.info('PROFILE ASSOCIATION REQUEST' * 3 + str(request_data))
 
-                sd3d_info_share_uri = 'https://sd3d.locbit.com/profile'
+                Filtracker_info_share_uri = 'https://sd3d.locbit.com/profile'
 
-                sd3d_api_key = self._settings.get(['sd3dAPIKey'])
-                sd3d_access_id = self._settings.get(['sd3dAccessID'])
+                SD3D_api_key = self._settings.get(['SD3DAPIKey'])
+                SD3D_access_id = self._settings.get(['SD3DAccessID'])
 
-                if len(sd3d_api_key) == 0 or len(sd3d_access_id) == 0:
+                if len(SD3D_api_key) == 0 or len(SD3D_access_id) == 0:
                         self._logger.error("No API key or access key in settings. Skipping profile update")
                         return
 
-                query_params = {'api': sd3d_api_key, 'access': sd3d_access_id}
+                query_params = {'api': SD3D_api_key, 'access': SD3D_access_id}
 
-                response = requests.post(sd3d_info_share_uri, params=query_params, headers={'Content-Type': 'application/json'}, data=request_data).json()
+                response = requests.post(Filtracker_info_share_uri, params=query_params, headers={'Content-Type': 'application/json'}, data=request_data).json()
 
                 self._logger.info('PROFILE ASSOCIATION RESPONSE' * 3 + str(response))
 
         def _auto_provision_printer(self):
-                sd3d_api_key = self._settings.get(['sd3dAPIKey'])
-                sd3d_access_id = self._settings.get(['sd3dAccessID'])
+                SD3D_api_key = self._settings.get(['SD3DAPIKey'])
+                SD3D_access_id = self._settings.get(['SD3DAccessID'])
 
-                query_params = {'api': sd3d_api_key, 'access': sd3d_access_id}
+                query_params = {'api': SD3D_api_key, 'access': SD3D_access_id}
                 did = self._settings.get(['did'])
                 lid = self._settings.get(['macAddress'])
 		printer_oem = self._get_current_printer_profile()['name']
@@ -608,16 +608,16 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
 		printer_dname = "%s %s %s %s %s %s" % (pretxt, printer_oem, printer_model, posttxt, lid, closetxt)
 
                 provision_post_data = json.dumps({
-                                                  'translator': 'SD3DPrinter',
+                                                  'translator': 'FiltrackerPrinter',
                                                   'DeviceName': printer_dname,
                                                   'lid': lid,
-                                                  'deviceDescriptionId': '559aeaf5d763cb2a02bb196d',
+                                                  'deviceDescriptionId': '56db96454a7a901f59815541',
                                                   'locationId': '13',
                                                   'userId': '116'})
 
                 self._logger.info('PRINTER AUTO PROVISION REQUEST' * 3 + str(provision_post_data))
 
-                response = requests.post('https://test-api.locbit.com/provision', params=query_params, headers={'Content-Type': 'application/json'}, data=provision_post_data).json()
+                response = requests.post('https://api.locbit.com/provision', params=query_params, headers={'Content-Type': 'application/json'}, data=provision_post_data).json()
 
                 self._logger.info('PRINTER AUTO PROVISION RESPONSE' * 3 + str(response))
 
@@ -632,7 +632,7 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
                         
                         self._logger.info('PRINTER ACTIVATION REQUEST' * 3 + str(activation_post_data))
 
-                        activate_response = requests.post('https://dev-billing.locbit.com/charge', params=query_params, headers={'Content-Type': 'application/json'}, data=activation_post_data).json()
+                        activate_response = requests.post('https://billing.locbit.com/charge', params=query_params, headers={'Content-Type': 'application/json'}, data=activation_post_data).json()
 
                         self._logger.info('PRINTER ACTIVATION RESPONSE' * 3 + str(activate_response))
 
@@ -653,7 +653,7 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
 
                 commands = ['/usr/bin/apt-get update',
                             '/usr/bin/apt-get install -y ipython python-opencv python-scipy python-numpy python-setuptools python-pip python-pygame python-zbar',
-                            '/bin/chmod +x /home/pi/oprint/lib/python2.7/site-packages/octoprint_SD3D/qr.py',
+                            '/bin/chmod +x /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/qr.py',
                             '/usr/bin/pip install --upgrade pip',
                             '/usr/local/bin/pip --no-cache-dir install timeout-decorator svgwrite https://github.com/sightmachine/SimpleCV/zipball/master'
                            ]
@@ -731,8 +731,8 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
                             initial_length='',
                             length='',
                             muid='',
-                            sd3dAPIKey='yCX9PgjsvzGuaKTT9yuUIJFehPHjMknU',
-                            sd3dAccessID='DxM7QlAsDo43Z0SJW1qwLh4FBXGQlaGU',
+                            SD3DAPIKey='yCX9PgjsvzGuaKTT9yuUIJFehPHjMknU',
+                            SD3DAccessID='DxM7QlAsDo43Z0SJW1qwLh4FBXGQlaGU',
                             jobProgress='',
                             layerHeight='0.25',
                             sharingMode=True,
@@ -749,7 +749,7 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
 		]
 
 	def get_assets(self):
-		return dict(js=["js/SD3D.js"])
+		return dict(js=["js/Filtracker.js"])
 
         def _auto_print(self, file_info):
 
@@ -833,12 +833,12 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
                         self._auto_print(payload)
                         self._download_best_profile()
                         
-		if event in sd3dMsgDict:
+		if event in FiltrackerMsgDict:
 			event_body = {
 				'uid' : uid,
 				'did' : did,
-				'event' : sd3dMsgDict[event]['name'],
-				'status' : sd3dMsgDict[event]['value']
+				'event' : FiltrackerMsgDict[event]['name'],
+				'status' : FiltrackerMsgDict[event]['value']
 			}
 		elif event == 'FileSelected':
 			event_body = {
@@ -868,9 +868,9 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
 		try:
 			requests.post(url, data = event_body)
 		except BadStatusLine:
-			self._logger.info("SD3D: Bad Status")
+			self._logger.info("Filtracker: Bad Status")
 
-		self._logger.info("SD3D: Recording event " + event)
+		self._logger.info("Filtracker: Recording event " + event)
 
 	def sendLayerStatus(self, layer):
 		global uid
@@ -887,7 +887,7 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
 		try:
 			requests.post(url, data = event_body)
 		except BadStatusLine:
-			self._logger.info("SD3D: Bad Status")
+			self._logger.info("Filtracker: Bad Status")
 
 	def checkPrinterStatus(self):
 		url = "http://localhost/api/printer"
@@ -897,7 +897,7 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
 			r = requests.get(url,  headers = { "X-Api-Key" : apiKey })
 			self._logger.info(r.text)
 		except BadStatusLine:
-			self._logger.info("SD3D: Bad Status")
+			self._logger.info("Filtracker: Bad Status")
         
         def is_wizard_required(self):
 
@@ -909,4 +909,4 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
                 print('5' * 20 + "{}".format(self._settings.get(['macAddress'])))
 
 __plugin_name__ = "Filtracker"
-__plugin_implementation__ = SD3DPlugin()
+__plugin_implementation__ = FiltrackerPlugin()

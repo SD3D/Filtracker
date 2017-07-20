@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 import octoprint.util
 
-sd3dMsgDict = {
+FiltrackerMsgDict = {
 	'Connected' : {
 		'name' : 'PrinterStatus',
 		'value' : 'Connected'

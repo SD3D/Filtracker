@@ -1,0 +1,40 @@
+<h3>{{ _('Filtracker') }}</h3>
+<div class="control-group">
+    <div class="controls">
+        <label class="checkbox">
+            <input type="checkbox" data-bind="checked: settings.plugins.Filtracker.cloudMode"> {{ _('Enable material profile optimization (Cloud Mode)') }}
+        </label>
+    </div>
+</div>
+<div class="control-group">
+    <div class="controls">
+        <label class="checkbox">
+            <input type="checkbox" data-bind="checked: settings.plugins.Filtracker.autoPrintMode"> {{ _('Enable automatic slicing and printing of STL files (AutoPrint Mode)') }}
+        </label>
+    </div>
+</div>
+<h4>{{ _('AutoPrint Settings') }}</h4>
+<label class="control-label">{{ _('Layer Height') }}</label>
+<div class="controls">
+    <input type="number" step="any" min="0.05" max="1.0" class="input-mini text-right" data-bind="value: settings.plugins.Filtracker.layerHeight">
+    <span class="add-on">mm</span>
+</div>
+<label class="control-label">{{ _('Infill') }}</label>
+<div class="controls">
+    <input type="number" step="1" min="1" class="input-mini text-right" data-bind="value: settings.plugins.Filtracker.fillDensity">
+    <span class="add-on">%</span>
+</div>
+<label class="control-label">{{ _(' ') }}</label>
+<h4>{{ _('Cloud Mode API') }}</h4>
+<label class="control-label">{{ _('Filtracker API Key') }}</label>
+<div class="controls">
+    <input type="text" class="input-block-level" data-bind="value: settings.plugins.Filtracker.FiltrackerAPIKey" disabled>
+</div>
+<label class="control-label">{{ _('Access ID') }}</label>
+<div class="controls">
+    <input type="text" class="input-block-level" data-bind="value: settings.plugins.Filtracker.FiltrackerAccessID" disabled>
+</div>
+<label class="control-label">{{ _('Device ID') }}</label>
+<div class="controls">
+    <input type="text" class="input-block-level" data-bind="value: settings.plugins.Filtracker.macAddress" disabled>
+</div>
