@@ -2,18 +2,19 @@
 <div class="control-group">
     <div class="controls">
         <label class="checkbox">
-            <input type="checkbox" data-bind="checked: settings.plugins.Filtracker.cloudMode"> {{ _('Enable material profile optimization (Cloud Mode)') }}
+            <input type="checkbox" data-bind="checked: settings.plugins.Filtracker.autoPrintMode"> {{ _('Enable AutoPrint') }}
         </label>
     </div>
 </div>
 <div class="control-group">
     <div class="controls">
         <label class="checkbox">
-            <input type="checkbox" data-bind="checked: settings.plugins.Filtracker.autoPrintMode"> {{ _('Enable automatic slicing and printing of STL files (AutoPrint Mode)') }}
+            <input type="checkbox" data-bind="checked: settings.plugins.Filtracker.cloudMode"> {{ _('Enable Cloud Mode') }}
         </label>
     </div>
 </div>
 <h4>{{ _('AutoPrint Settings') }}</h4>
+<h5>{{ _('Automatic slicing and printing of STL files') }}</h5>
 <label class="control-label">{{ _('Layer Height') }}</label>
 <div class="controls">
     <input type="number" step="any" min="0.05" max="1.0" class="input-mini text-right" data-bind="value: settings.plugins.Filtracker.layerHeight">
@@ -26,6 +27,7 @@
 </div>
 <label class="control-label">{{ _(' ') }}</label>
 <h4>{{ _('Cloud Mode API') }}</h4>
+<h5>{{ _('Material profile optimization') }}</h5>
 <label class="control-label">{{ _('API Key') }}</label>
 <div class="controls">
     <input type="text" class="input-block-level" data-bind="value: settings.plugins.Filtracker.SD3DAPIKey" disabled>
