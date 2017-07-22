@@ -608,7 +608,7 @@ class FiltrackerPlugin(octoprint.plugin.StartupPlugin,
 		printer_dname = "%s %s %s %s %s %s" % (pretxt, printer_oem, printer_model, posttxt, lid, closetxt)
 
                 provision_post_data = json.dumps({
-                                                  'translator': 'FiltrackerPrinter',
+                                                  'translator': 'SD3DPrinter',
                                                   'DeviceName': printer_dname,
                                                   'lid': lid,
                                                   'deviceDescriptionId': '56db96454a7a901f59815541',
