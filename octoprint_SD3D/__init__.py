@@ -52,7 +52,6 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
 			self._logger.info("command2 called, some_parameter is {some_parameter}".format(**data))
 
         def _post_spool_data(self, spool_data):
-                
                 post_data = {"MUID":spool_data['muid'],
                              "Material":spool_data['material'],
                              "Color":spool_data['color'],
