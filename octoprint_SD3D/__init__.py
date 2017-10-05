@@ -26,13 +26,7 @@ status_url = 'https://test-api.locbit.com/statusByLid'
 HTTP_REQUEST_TIMEOUT=50
 LAYER_HEIGHT_THRESHOLD=0.1
 
-class SD3DPlugin(octoprint.plugin.StartupPlugin,
-			octoprint.plugin.TemplatePlugin,
-			octoprint.plugin.SettingsPlugin,
-			octoprint.plugin.EventHandlerPlugin,
-			octoprint.plugin.AssetPlugin,
-			octoprint.plugin.SimpleApiPlugin,
-                        octoprint.plugin.WizardPlugin):
+class SD3DPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePlugin, octoprint.plugin.SettingsPlugin, octoprint.plugin.EventHandlerPlugin, octoprint.plugin.AssetPlugin, octoprint.plugin.SimpleApiPlugin, octoprint.plugin.WizardPlugin):
 
 
 	def get_api_commands(self):
