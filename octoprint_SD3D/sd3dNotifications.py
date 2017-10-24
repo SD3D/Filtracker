@@ -41,5 +41,9 @@ sd3dMsgDict = {
 	'FileDeselected' : {
 		'name' : 'File',
 		'value' : 'NULL'
+	},
+	'SlicingStarted' : {
+		'name' : 'SlicingStarted',
+		'value' : 'True'
 	}
 }
