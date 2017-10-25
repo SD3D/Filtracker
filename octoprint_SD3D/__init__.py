@@ -15,6 +15,7 @@ import os
 from shutil import copyfile
 import urllib
 from urlparse import urlsplit
+import subprocess
 
 Layer = 0
 uid = "55de667a295efb62093205e4"
@@ -22,7 +23,7 @@ uid = "55de667a295efb62093205e4"
 #url = "http://api.locbit.com:8888/endpoint"
 url = "https://test-api.locbit.com/endpoint"
 status_url = 'https://test-api.locbit.com/statusByLid'
-nvm_url =
+
 
 HTTP_REQUEST_TIMEOUT=50
 LAYER_HEIGHT_THRESHOLD=0.1
@@ -901,6 +902,14 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePlugin
                         return True
 
                 print('5' * 20 + "{}".format(self._settings.get(['macAddress'])))
+
+        def edge_check(self):
+                start = "/home/pi/locbit-edge/./start-up.py"
+                edge = "/home/pi/locbit-edge"
+                if os.path.exists(edge):
+                        subprocess.call(start)
+                        self.logget.info("Locbit Edge is installing.")
+
 
 __plugin_name__ = "Filtracker"
 __plugin_implementation__ = SD3DPlugin()
