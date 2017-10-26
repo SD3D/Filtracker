@@ -15,7 +15,6 @@ import os
 from shutil import copyfile
 import urllib
 from urlparse import urlsplit
-import subprocess
 
 Layer = 0
 uid = "55de667a295efb62093205e4"
@@ -24,15 +23,23 @@ uid = "55de667a295efb62093205e4"
 url = "https://test-api.locbit.com/endpoint"
 status_url = 'https://test-api.locbit.com/statusByLid'
 
-
 HTTP_REQUEST_TIMEOUT=50
 LAYER_HEIGHT_THRESHOLD=0.1
 
-class SD3DPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePlugin, octoprint.plugin.SettingsPlugin, octoprint.plugin.EventHandlerPlugin, octoprint.plugin.AssetPlugin, octoprint.plugin.SimpleApiPlugin, octoprint.plugin.WizardPlugin):
+class SD3DPlugin(octoprint.plugin.StartupPlugin,
+			octoprint.plugin.TemplatePlugin,
+			octoprint.plugin.SettingsPlugin,
+			octoprint.plugin.EventHandlerPlugin,
+			octoprint.plugin.AssetPlugin,
+			octoprint.plugin.SimpleApiPlugin,
+                        octoprint.plugin.WizardPlugin):
 
 
 	def get_api_commands(self):
-		return dict(command1=[], command2=["some_parameter"])
+		return dict(
+			command1=[],
+			command2=["some_parameter"]
+		)
 
 	def on_api_command(self, command, data):
 		import flask
@@ -43,16 +50,15 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePlugin
 			self._logger.info("command1 called, parameter is {parameter}".format(**locals()))
 		elif command == "command2":
 			self._logger.info("command2 called, some_parameter is {some_parameter}".format(**data))
-        #this is this first attempt by the plugin to receive the spool data and assign the spool data to the JSON variables.
-        #each arguement is a string variable in the "Spool_data" list. From there that variable is referenced by the JSON variable.
+
         def _post_spool_data(self, spool_data):
-                #I put the required spaces after the semi-colons
-                post_data = {"MUID": spool_data['muid'],
-                             "Material": spool_data['material'],
-                             "Color": spool_data['color'],
-                             "Diameter": spool_data['diameter'],
-                             "Length": spool_data['length']}
-                #the first arg is the url, second is the post data parsed as JSON variables, last is the time out constant
+                
+                post_data = {"MUID":spool_data['muid'],
+                             "Material":spool_data['material'],
+                             "Color":spool_data['color'],
+                             "Diameter":spool_data['diameter'],
+                             "Length":spool_data['length']}
+
                 post_result = requests.post(url, json=post_data, timeout=HTTP_REQUEST_TIMEOUT)
 
                 post_result.raise_for_status()
@@ -69,9 +75,9 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePlugin
 
                 if len(sd3d_api_key) == 0 or len(sd3d_access_id) == 0:
                         raise Exception("Cannot get stored spool length, either sd3d api key or access ID is missing from settings")
-                #this is hte location of the requested data
+
                 request_uri = "{}/{}/SD3DPrinter".format(status_url, muid)
-                #these are api and access key strings
+
                 query_params = {'api': sd3d_api_key, 'access': sd3d_access_id} 
 
                 response = requests.get(request_uri, params=query_params, timeout=HTTP_REQUEST_TIMEOUT)
@@ -81,26 +87,25 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePlugin
                 response_data = response.json()
 
                 if 'measurements' in response_data and 'Length' in response_data['measurements']:
-
                         length = response_data['measurements']['Length'].get('status')
                         return length
-                #I put the entire statement on one line. Easier for me to read.
-                elif 'success' in response_data and not response_data['success'] and response_data['message'] == 'Device is not found':
+                elif 'success' in response_data and \
+                      not response_data['success'] and \
+                      response_data['message'] == 'Device is not found':
                         return None
                 else:
-                        #there was an indent error here as well as on the pi
-                        return None
+                      return None
 
         def _get_spool_settings(self):
 
                 setting_keys = ['muid', 'material', 'color', 'diameter', 'length', 'initial_length', 'jobProgress']
-                #This is first setup as a dictionary
+
                 setting_dict = {}
 
                 for setting_key in setting_keys:
 
                         setting_value = self._settings.get([setting_key])
-                        #but here they reference it like a list? why is that? and wouldn't that cause error in the code?
+
                         setting_dict[setting_key] = setting_value
 
                 return setting_dict 
@@ -111,7 +116,7 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePlugin
        
                 assert octoprint_api_key is not None and len(octoprint_api_key) > 0
 
-                response = requests.get(job_uri, headers = { "X-Api-Key" : octoprint_api_key }, timeout=HTTP_REQUEST_TIMEOUT)
+                response = requests.get(job_uri,  headers = { "X-Api-Key" : octoprint_api_key }, timeout=HTTP_REQUEST_TIMEOUT)
                 response.raise_for_status()
 
                 return response.json()
@@ -122,7 +127,7 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePlugin
 
                 assert octoprint_api_key is not None and len(octoprint_api_key) > 0
 
-                response = requests.get(profile_uri, headers = {"X-Api-Key": octoprint_api_key }, timeout=HTTP_REQUEST_TIMEOUT)
+                response = requests.get(profile_uri,  headers = { "X-Api-Key" : octoprint_api_key }, timeout=HTTP_REQUEST_TIMEOUT)
                 response.raise_for_status()
 
                 return response.json()
@@ -133,7 +138,7 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePlugin
 
                 assert octoprint_api_key is not None and len(octoprint_api_key) > 0
 
-                response = requests.get(profile_uri, headers={"X-Api-Key": octoprint_api_key}, timeout=HTTP_REQUEST_TIMEOUT)
+                response = requests.get(profile_uri,  headers = { "X-Api-Key" : octoprint_api_key }, timeout=HTTP_REQUEST_TIMEOUT)
                 response.raise_for_status()
                 json_response = response.json()
 
@@ -145,7 +150,7 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePlugin
 
                 assert octoprint_api_key is not None and len(octoprint_api_key) > 0
 
-                response = requests.get(profile_uri, headers = { "X-Api-Key" : octoprint_api_key }, timeout=HTTP_REQUEST_TIMEOUT)
+                response = requests.get(profile_uri,  headers = { "X-Api-Key" : octoprint_api_key }, timeout=HTTP_REQUEST_TIMEOUT)
                 response.raise_for_status()
                 printers = response.json()['profiles']
 
@@ -159,7 +164,7 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePlugin
 
                 assert octoprint_api_key is not None and len(octoprint_api_key) > 0
 
-                response = requests.get(profile_uri, headers={ "X-Api-Key" : octoprint_api_key }, timeout=HTTP_REQUEST_TIMEOUT)
+                response = requests.get(profile_uri,  headers = { "X-Api-Key" : octoprint_api_key }, timeout=HTTP_REQUEST_TIMEOUT)
                 response.raise_for_status()
                 profiles = response.json()
 
@@ -172,8 +177,8 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePlugin
                 octoprint_api_key = settings().get(['api', 'key']) 
 
                 assert octoprint_api_key is not None and len(octoprint_api_key) > 0
-                #extra space
-                response = requests.get(local_file_uri, headers={"X-Api-Key": octoprint_api_key}, timeout=HTTP_REQUEST_TIMEOUT)
+
+                response = requests.get(local_file_uri,  headers = { "X-Api-Key" : octoprint_api_key }, timeout=HTTP_REQUEST_TIMEOUT)
                 response.raise_for_status()
                 json_response = response.json()
 
@@ -184,8 +189,8 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePlugin
                 octoprint_api_key = settings().get(['api', 'key']) 
 
                 assert octoprint_api_key is not None and len(octoprint_api_key) > 0
-                #extra spaces
-                response = requests.get(job_uri, headers={"X-Api-Key": octoprint_api_key}, timeout=HTTP_REQUEST_TIMEOUT)
+
+                response = requests.get(job_uri,  headers = { "X-Api-Key" : octoprint_api_key }, timeout=HTTP_REQUEST_TIMEOUT)
                 response.raise_for_status()
                 job = response.json()
 
@@ -205,7 +210,7 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePlugin
                         tool0_obj = None
                         estimated_job_length = None
                         job_completion_percent = None
-
+                        
                         if job_obj is not None:
                                 filament_obj = job_obj.get('filament')
 
@@ -230,9 +235,7 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePlugin
                                 # If a job reset has been detected, set initial length to length
                                 if internal_progress != '' and internal_progress > job_completion_percent:
                                         initial_length = float(current_spool_settings['length'])
-
-                #what bracket does this current_spool belong to?
-				current_spool_settings['initial_length'] = str(current_spool_settings['length'])
+					current_spool_settings['initial_length'] = str(current_spool_settings['length'])   
 
                                 # Job filament length is in millimeters, so must convert to meters
                                 length_job_used = (job_completion_percent / 100) * (estimated_job_length / 1000)
@@ -295,10 +298,9 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePlugin
                 if request.args.get('autoprint_setting') == '1':
                         return flask.jsonify(result=self._settings.get(['autoPrintMode']))
                 
-        import subprocess
+		import subprocess
    
                 qr_script_path = '/home/pi/oprint/lib/python2.7/site-packages/octoprint_SD3D/qr.py'
-                #this is the program using the hardware to handle some of the processes
                 subprocess_args = [qr_script_path]
 
                 output = ''
@@ -650,7 +652,7 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePlugin
                             '/bin/chmod +x /home/pi/oprint/lib/python2.7/site-packages/octoprint_SD3D/qr.py',
                             '/usr/bin/pip install --upgrade pip',
                             '/usr/local/bin/pip --no-cache-dir install timeout-decorator svgwrite https://github.com/sightmachine/SimpleCV/zipball/master',
-                            '/usr/local/bin git clone https://github.com/Locbit/locbit-edge.git'
+                            '/usr/local/bin/git clone https://github.com/Locbit/Filtracker.git'
                            ]
 
                 for command in commands:
@@ -827,7 +829,7 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePlugin
                 elif event == "Upload":
                         self._auto_print(payload)
                         self._download_best_profile()
-
+                        
 		if event in sd3dMsgDict:
 			event_body = {
 				'uid' : uid,
@@ -902,14 +904,6 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.TemplatePlugin
                         return True
 
                 print('5' * 20 + "{}".format(self._settings.get(['macAddress'])))
-
-        def edge_check(self):
-                start = "/home/pi/locbit-edge/./start-up.py"
-                edge = "/home/pi/locbit-edge"
-                if os.path.exists(edge):
-                        subprocess.call(start)
-                        self.logget.info("Locbit Edge is installing.")
-
 
 __plugin_name__ = "Filtracker"
 __plugin_implementation__ = SD3DPlugin()
