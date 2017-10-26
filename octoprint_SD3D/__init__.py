@@ -652,7 +652,7 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
                             '/bin/chmod +x /home/pi/oprint/lib/python2.7/site-packages/octoprint_SD3D/qr.py',
                             '/usr/bin/pip install --upgrade pip',
                             '/usr/local/bin/pip --no-cache-dir install timeout-decorator svgwrite https://github.com/sightmachine/SimpleCV/zipball/master',
-                            '/usr/local/bin git clone https://github.com/Locbit/Filtracker.git'
+                            '/usr/local/bin git clone https://github.com/Locbit/locbit-edge.git'
                            ]
 
                 for command in commands:
