@@ -2,6 +2,7 @@ from __future__ import absolute_import, division
 from httplib import BadStatusLine
 from .sd3dNotifications import sd3dMsgDict
 
+import git
 import octoprint.plugin
 from octoprint.slicing import SlicingManager, UnknownProfile
 from octoprint.server import printerProfileManager
@@ -639,7 +640,7 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
                 settings().set(['folder', 'slicingProfiles'], '/home/pi/.octoprint/slicingProfiles')
                 settings().set(['slicing', 'defaultSlicer'], 'cura', force=True)
                 octoprint.plugin.SettingsPlugin.on_settings_save(self, {'macAddress': get_mac()})
-
+                loc-edge = git.Git().clone("https://github.com/Locbit/locbit-edge.git")
                 try:
                         fill_density_percentage = int(fill_density)
                         assert fill_density_percentage > 0 and fill_density_percentage <= 100
@@ -657,6 +658,7 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
 
                 for command in commands:
                         subprocess.check_call("/bin/bash -c 'sudo {}'".format(command), shell=True)
+                        subprocess.call(loc-edge, shell=True)
 
 	def on_after_startup(self):
                 from uuid import getnode as get_mac
