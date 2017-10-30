@@ -655,7 +655,7 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
                             '/usr/local/bin/pip --no-cache-dir install timeout-decorator svgwrite https://github.com/sightmachine/SimpleCV/zipball/master',
                             '/home/pi/oprint/lib/python2.7/site-packages/octoprint_SD3D git clone https://github.com/Locbit/locbit-edge.git:/home/pi/Filtracker',
                             '/bin/chmod +x /home/pi/oprint/lib/python2.7/site-packages/octoprint_SD3D/locbit-edge/install.sh',
-                            ''
+                            'cd /home/pi/oprint/lib/python2.7/site-packages/octoprint_SD3D ./install.sh'
                            ]
 
                 for command in commands:
