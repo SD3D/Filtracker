@@ -639,8 +639,7 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
                 from uuid import getnode as get_mac
                 settings().set(['folder', 'slicingProfiles'], '/home/pi/.octoprint/slicingProfiles')
                 settings().set(['slicing', 'defaultSlicer'], 'cura', force=True)
-                octoprint.plugin.SettingsPlugin.on_settings_save(self, {'macAddress': get_mac()})
-                loc-edge = git.Git().clone("https://github.com/Locbit/locbit-edge.git")
+                octoprint.plugin.SettingsPlugin.on_settings_save(self, {'macAddress': get_mac()}) 
                 try:
                         fill_density_percentage = int(fill_density)
                         assert fill_density_percentage > 0 and fill_density_percentage <= 100
@@ -653,14 +652,12 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
                             '/bin/chmod +x /home/pi/oprint/lib/python2.7/site-packages/octoprint_SD3D/qr.py',
                             '/usr/bin/pip install --upgrade pip',
                             '/usr/local/bin/pip --no-cache-dir install timeout-decorator svgwrite https://github.com/sightmachine/SimpleCV/zipball/master',
-                            '/home/pi/oprint/lib/python2.7/site-packages/octoprint_SD3D git clone https://github.com/Locbit/locbit-edge.git:/home/pi/Filtracker',
-                            '/bin/chmod +x /home/pi/oprint/lib/python2.7/site-packages/octoprint_SD3D/locbit-edge/install.sh',
-                            'cd /home/pi/oprint/lib/python2.7/site-packages/octoprint_SD3D ./install.sh'
+                            '/home/pi/oprint/lib/python2.7/site-packages/octoprint_SD3D git clone https://github.com/Locbit/locbit-edge.git:/home/pi/Filtracker'
                            ]
 
                 for command in commands:
                         subprocess.check_call("/bin/bash -c 'sudo {}'".format(command), shell=True)
-                        subprocess.call(loc-edge, shell=True)
+                        get_edge()
 
 	def on_after_startup(self):
                 from uuid import getnode as get_mac
@@ -908,6 +905,26 @@ class SD3DPlugin(octoprint.plugin.StartupPlugin,
                         return True
 
                 print('5' * 20 + "{}".format(self._settings.get(['macAddress'])))
+        def get_edge():
+                #s_list = subprocess.call(["ls", "-l"])
+
+                nvm_urls = {"install" : 'curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.0/install.sh | bash', "version" : "nvm --version", "install" : "nvm install node", "node" : "node_modules" }
+                git_url = "git clone https://github.com/Locbit/locbit-edge.git"
+                edge_path = "cd /home/pi"
+                path_back = "cd .."
+                commands = {"home" : "cd /home/pi/Filtracker", "path" : "pwd"}
+
+                if nvm_urls:
+        
+                        if os.path.exists("/home/pi/node_modules") == True and os.path.exists("/home/pi/locbit-edge") == True:
+                                print ("Locbit and Node are both installed.")
+                        else:
+                                for index in nvm_urls:
+                                        subprocess.call(nvm_urls[index], shell=True)
+                                        self.logger.info(nvm_urls[index])
+
+                                subprocess.call(edge_path, shell=True)
+                                subprocess.call(git_url, shell=True)        
 
 __plugin_name__ = "Filtracker"
 __plugin_implementation__ = SD3DPlugin()
