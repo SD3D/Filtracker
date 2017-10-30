@@ -1,0 +1,12 @@
+<form class="form-horizontal">
+   <br><p>By installing this plugin you consent to the terms of use as detailed in the official <a href="https://github.com/SD3D/Filtracker/wiki" target="_blank">Filtracker Manual</a><br></p> 
+   <label class="control-label">{{ _('Default infill (1-100)') }}</label>
+    <div class="controls">
+    <input type="text" class="input-block-level" id="fillPercentInstall" placeholder="20">
+   </div>
+   <label class="control-label">{{ _(' ') }}</label>
+   <div class="control-group">
+         <button class="btn btn-block" type="button" id="install-btn" data-bind="click: function() { $root.installDeps() }">{{ _('Install Dependency Packages') }}</button>
+   <br><p><strong>WARNING: INSTALLATION WILL TAKE SEVERAL MINUTES TO COMPLETE. DO NOT REFRESH THE PAGE OR CLICK "FINISH" UNTIL NOTIFIED THAT THE INSTALLATION IS COMPLETE.</strong></p>
+   </div>
+</form>
