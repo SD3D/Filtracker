@@ -788,12 +788,13 @@ class FiltrackerPlugin(octoprint.plugin.StartupPlugin,
                                       'profile': default_slice_profile_name,
                                       'printerProfile': printer_profile_name,
                                       'profile.layer_height': layerHeight
+				      'profile.fill_density': fill_density_percentage
                                      }
 
-                        if fill_density_percentage is not None:
-                                slice_data['profile.infill'] = fill_density_percentage
-                                hold = slice_data['profile.infill']
-                                self._logger.info("This is a test message from jason", str(hold))
+                        #if fill_density_percentage is not None:
+                        #        slice_data['profile.infill'] = fill_density_percentage
+                        #        hold = slice_data['profile.infill']
+                        #        self._logger.info("This is a test message from jason", str(hold))
 
                         assert octoprint_api_key is not None and len(octoprint_api_key) > 0
                         response = requests.post(auto_print_uri, headers = { "X-Api-Key" : octoprint_api_key }, json=slice_data, timeout=HTTP_REQUEST_TIMEOUT)
