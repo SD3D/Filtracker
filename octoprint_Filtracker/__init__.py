@@ -238,7 +238,7 @@ class FiltrackerPlugin(octoprint.plugin.StartupPlugin,
 					current_spool_settings['initial_length'] = str(current_spool_settings['length'])   
 
                                 # Job filament length is in millimeters, so must convert to meters
-                                length_job_used = (job_completion_percent / 100) * (estimated_job_length / 1000)
+                                length_job_used = (job_completion_percent / 100) * (float(estimated_job_length) / 1000)
 
                                 new_length = initial_length - length_job_used
 
@@ -463,6 +463,7 @@ class FiltrackerPlugin(octoprint.plugin.StartupPlugin,
 
                 try:
                         layer_height = float(self._settings.get(['layerHeight']))
+                        self._logger.info("Jason Look at the layer height", str(layer_height))
                 except Exception as e:
                         self._logger.error("Could not parse layer height {}, skipping best profile download".format(layer_height))
                         return
@@ -772,6 +773,8 @@ class FiltrackerPlugin(octoprint.plugin.StartupPlugin,
                 if file_name.lower().endswith('.stl') and file_target == 'local':
                         auto_print_uri = "http://localhost/api/files/local/{}".format(urllib.quote_plus(file_path))
                         octoprint_api_key = settings().get(['api', 'key']) 
+                        layerHeight = float(self._settings.get(['layerHeight']))
+                        self._logger.info("Get this layer height jason", str(layerHeight))
 
                         #default_slice_profile_name = self._get_default_slice_profile('cura')['key']
                         default_slice_profile_name = self._get_default_slice_profile('cura')
@@ -783,11 +786,15 @@ class FiltrackerPlugin(octoprint.plugin.StartupPlugin,
                                       'command': 'slice',
                                       'print': True,
                                       'profile': default_slice_profile_name,
-                                      'printerProfile': printer_profile_name
+                                      'printerProfile': printer_profile_name,
+                                      'profile.layer_height': layerHeight
+				      'profile.fill_density': fill_density_percentage
                                      }
 
-                        if fill_density_percentage is not None:
-                                slice_data['profile.fill_density'] = fill_density_percentage
+                        #if fill_density_percentage is not None:
+                        #        slice_data['profile.infill'] = fill_density_percentage
+                        #        hold = slice_data['profile.infill']
+                        #        self._logger.info("This is a test message from jason", str(hold))
 
                         assert octoprint_api_key is not None and len(octoprint_api_key) > 0
                         response = requests.post(auto_print_uri, headers = { "X-Api-Key" : octoprint_api_key }, json=slice_data, timeout=HTTP_REQUEST_TIMEOUT)
@@ -831,7 +838,7 @@ class FiltrackerPlugin(octoprint.plugin.StartupPlugin,
                         self._update_profile_event_stats(event)
                 elif event == "Upload":
                         self._auto_print(payload)
-                        self._download_best_profile()
+                        #self._download_best_profile()
                         
 		if event in FiltrackerMsgDict:
 			event_body = {
