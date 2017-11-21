@@ -787,7 +787,7 @@ class FiltrackerPlugin(octoprint.plugin.StartupPlugin,
                                       'print': True,
                                       'profile': default_slice_profile_name,
                                       'printerProfile': printer_profile_name,
-                                      'profile.layer_height': layerHeight
+                                      'profile.layer_height': layerHeight,
 				      'profile.fill_density': fill_density_percentage
                                      }
 
