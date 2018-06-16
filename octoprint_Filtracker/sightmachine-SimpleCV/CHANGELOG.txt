@@ -1,0 +1,126 @@
+Changes in 1.3
+-------------------------------
+* These are by no order of importance:
+
+Webp image format support added
+Read image EXIF data
+YCrCb color space added
+Image Equalize Added
+IPython notebook support added (i.e. 'simplecv notebook' from command line)
+Resize added
+Merge Color Channels Added
+Barcode library switched to zbar
+drawRectangle added
+findCircle added
+Whitebalance
+Keypoint detection and matching added (SURF, SIFT, and many others, see findKeypoints() docs)
+Optical Flow added (see findMotion() docs)
+Color Pallette generator added (see getColorPalette() docs)
+Skeletonize added
+Smart Threshold (a.k.a. Grab Cut) added, see smartThreshold() docs
+Smart Find Blobs, findBlobs using Grab Cut, see smartFindBlobs() docs
+Rewrote own Threshold function (a.k.a. Binarize), see threshold() docs
+FloodFill added
+FloodFill to mask added
+DFTFilter added
+HighPass filter added
+LowPass Filter added
+BandPass Filter added
+Butterworth Filter added
+Gaussian Filter added
+Unsharpen Filter added
+edgeIntersections added
+Contour Fitting added
+Line Fitting added
+Sobel Edge Detection Added
+CAMShift Tracking added (see track() docs)
+Image area function added
+ImageSet's added
+Camera.live() function added
+External Scanner Support added (see Scanner class docs)
+Digital Camera Support added (i.e. point & shoot and SLR cameras)
+Stereo Camera Support added
+Logging Support added
+Feature Overlap (inside, outside, above, below, etc) comparison functions added
+Feature.show() added
+Feature aspect ratio added
+Feature distance functions added
+Feature bounding box added
+TONS and TONS of documentation added to everything!
+
+A special thanks in this release to anyone externally who has submitted
+code.  A thanks to all those that made contributions for Google Summer of Code,
+or those that help on the support forums.  A special thanks to the
+Google Summer of Code students of 2012 for all their help in making
+SimpleCV more awesome. Sorry this release took so long, as you can see
+we have added tons of features, a lot probably not even listed above. (-xamox)
+
+
+
+
+Changes in 1.2
+-------------------------------
+scale - updated so it can be a value (eg Image.scale(0.5))
+binarize - now defaults to Otsu's method rather than binarize 127
+blit - overlay images on top of other images with the blit function
+start/stop camera - You now have the ability to start and stop a camera object without restarting simplecv
+randomized color - set each feature to support auto coloring
+stretch filter fixed
+foreground/background (codebook) segmentation - Easily compute the difference between foreground and background
+use web based flash to acquire images in webpage
+bag of features - This is used to detect features and use those features in image classification
+shape detectors - Added functions like isCircle(), isSquare(), etc.
+better camera support - Now supports HD and fallbacks so if openCV isn't working it tries other methods to work with camera
+python imaging library is now required
+hue distance - get the distance in hue from current image to another
+template matching - This is basic pattern matching
+convolution added
+integral image - take the derivative of an image
+haar wavelet calculations
+SVM (binary/multiclass) support added using OrangeSVM
+naive bayes (binary/multiclass) support added
+decision learning tree (binary/multiclass) support added
+random forrest machine learning added
+optical character recognition (OCR) support added via Tesseract
+ability to load images from URL. i.e. img = Image("http://www.foo.com/bar.png")
+pass a feature to crop function
+KNN classifier
+image segmentation
+
+
+
+Changes in 1.1
+-------------------------------
+All drawing has been moved to pygame-based surfaces in DrawingLayers
+text, and more advanced polygon drawing functions
+SDL-based display provided by Pygame
+python-cvblob has been removed and replaced by BlobMaker
+colorspace support for HSV
+videostream out for writing AVI files
+rotation operations
+feature-crop functions
+ColorMap for value -> color conversion
+ColorModel for training background/foreground segmentation
+numerous code adjustments to fit pylint
+calibration script for generating calibration
+superpacks include freenect and freenect-python drivers
+ 
+
+Changes in 1.0
+------------------------------
+Superpack installers for Mac and Windows
+Debian package available for Ubuntu
+Jpegstreamer url now accessable via function
+Tutorial/Shell fleshed out substantially
+Fixed windows-specific bugs in Camera class
+
+Changes in 0.9
+-----------------------
+
+Much improved performance in JpegStreamer
+Fixed favicon bug
+Internal module structure split by class/function
+new Image manipulation functions: rotate(), warp(), shear()
+added morph operators dialate(), erode()
+new shell mode based on iPython invoke with python -m SimpleCV.__init__
+fix threads not exiting cleanly bug
