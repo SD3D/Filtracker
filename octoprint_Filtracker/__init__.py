@@ -1094,7 +1094,7 @@ class FiltrackerPlugin(octoprint.plugin.StartupPlugin,
                         event_dict["Color"] = color
                 if len(diameter) > 0:
                         event_dict["Diameter"] = diameter
-                if len(length) > 0:
+                if len(length) > 0 and length >= 0:
                         event_dict['Length'] = length
                 return event_dict    
 
