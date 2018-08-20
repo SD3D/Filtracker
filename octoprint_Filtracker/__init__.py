@@ -719,10 +719,11 @@ class FiltrackerPlugin(octoprint.plugin.StartupPlugin,
                             '/usr/bin/apt-get update',
                             '/usr/bin/apt-get install -y ipython python-opencv python-scipy python-numpy python-setuptools python-pip python-pygame python-zbar',
                             '/bin/chmod +x /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/qr.py',
-                            '/usr/bin/pip install --upgrade pip',
-                            '/usr/local/bin/pip --no-cache-dir install timeout-decorator svgwrite https://github.com/sightmachine/SimpleCV/zipball/master',
+                            '/usr/bin/pip install --upgrade pip'
                         ]
                 import os
+                if not os.path.exists("/usr/local/lib/python2.7/dist-packages/SimpleCV"):
+                        commands.append('/usr/local/bin/pip --no-cache-dir install timeout-decorator svgwrite https://github.com/sightmachine/SimpleCV/zipball/master')
                 if os.path.exists('/home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/edge_set.py'):
                         commands.append('/bin/mv /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/edge_set.py /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/edge_set.sh')
                         commands.append('/bin/chmod 755 ~/oprint/lib/python2.7/site-packages/octoprint_Filtracker/edge_set.sh')
