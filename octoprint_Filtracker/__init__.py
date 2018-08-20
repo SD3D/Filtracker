@@ -719,24 +719,31 @@ class FiltrackerPlugin(octoprint.plugin.StartupPlugin,
                             '/usr/bin/apt-get update',
                             '/usr/bin/apt-get install -y ipython python-opencv python-scipy python-numpy python-setuptools python-pip python-pygame python-zbar',
                             '/bin/chmod +x /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/qr.py',
-                            '/usr/bin/pip install --upgrade pip',
-                            '/usr/local/bin/pip --no-cache-dir install timeout-decorator svgwrite https://github.com/sightmachine/SimpleCV/zipball/master',
-                            '/bin/mv /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/edge_set.py /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/edge_set.sh',
-                            '/bin/chmod 755 ~/oprint/lib/python2.7/site-packages/octoprint_Filtracker/edge_set.sh',
-                            '/home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/edge_set.sh',
-                            '/bin/mv /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/zip_check.py /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/zip_check.sh',
-                            '/bin/chmod 755 ~/oprint/lib/python2.7/site-packages/octoprint_Filtracker/zip_check.sh',
-                            '/home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/zip_check.sh',
-                            '/usr/bin/wget -P ~/oprint/lib/python2.7/site-packages/octoprint_Filtracker https://github.com/Locbit/locbit-edge/archive/master.zip',
-                            '/usr/bin/unzip ~/oprint/lib/python2.7/site-packages/octoprint_Filtracker/master.zip -d ~/oprint/lib/python2.7/site-packages/octoprint_Filtracker',
-                            '/bin/mv /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/locbit-edge-master/config.js.default /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/locbit-edge-master/config.js',
-                            '/bin/mv /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/shell.py /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/locbit-edge-master/shell.sh',
-                            '/bin/chmod 755 ~/oprint/lib/python2.7/site-packages/octoprint_Filtracker/locbit-edge-master/shell.sh',
-                            '/home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/locbit-edge-master/shell.sh',
-                            '/bin/cp /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/pm_check.py /etc/init.d/pm_check.sh',
-                            '/bin/chmod 755 /etc/init.d/pm_check.sh',
-                            'update-rc.d pm_check.sh defaults'
+                            '/usr/bin/pip install --upgrade pip'
                         ]
+                import os
+                if not os.path.exists("/usr/local/lib/python2.7/dist-packages/SimpleCV"):
+                        commands.append('/usr/local/bin/pip --no-cache-dir install timeout-decorator svgwrite https://github.com/sightmachine/SimpleCV/zipball/master')
+                if os.path.exists('/home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/edge_set.py'):
+                        commands.append('/bin/mv /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/edge_set.py /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/edge_set.sh')
+                        commands.append('/bin/chmod 755 ~/oprint/lib/python2.7/site-packages/octoprint_Filtracker/edge_set.sh')
+                        commands.append('/home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/edge_set.sh')
+
+                if os.path.exists('/home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/zip_check.py'):
+                        commands.append('/bin/mv /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/zip_check.py /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/zip_check.sh')
+                        commands.append('/bin/chmod 755 ~/oprint/lib/python2.7/site-packages/octoprint_Filtracker/zip_check.sh')
+                        commands.append('/home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/zip_check.sh')
+                        commands.append('/usr/bin/wget -P ~/oprint/lib/python2.7/site-packages/octoprint_Filtracker https://github.com/Locbit/locbit-edge/archive/master.zip')
+                        commands.append('/usr/bin/unzip ~/oprint/lib/python2.7/site-packages/octoprint_Filtracker/master.zip -d ~/oprint/lib/python2.7/site-packages/octoprint_Filtracker')
+                        commands.append('/bin/mv /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/locbit-edge-master/config.js.default /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/locbit-edge-master/config.js')
+                if os.path.exists('/home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/shell.py'):
+                        commands.append('/bin/mv /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/shell.py /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/locbit-edge-master/shell.sh')
+                        commands.append('/bin/chmod 755 ~/oprint/lib/python2.7/site-packages/octoprint_Filtracker/locbit-edge-master/shell.sh')
+                        commands.append('/home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/locbit-edge-master/shell.sh')
+                        commands.append('/bin/cp /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/pm_check.py /etc/init.d/pm_check.sh')
+                        commands.append('/bin/chmod 755 /etc/init.d/pm_check.sh')
+                        commands.append('update-rc.d pm_check.sh defaults')
+                commands.append('/etc/init.d/pm_check.sh')
                 for command in commands:
                         subprocess.check_call("/bin/bash -c 'sudo {}'".format(command), shell=True)
         #on_after_startup
