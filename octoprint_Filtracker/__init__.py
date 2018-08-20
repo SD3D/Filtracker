@@ -742,6 +742,7 @@ class FiltrackerPlugin(octoprint.plugin.StartupPlugin,
                         commands.append('/bin/cp /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/pm_check.py /etc/init.d/pm_check.sh')
                         commands.append('/bin/chmod 755 /etc/init.d/pm_check.sh')
                         commands.append('update-rc.d pm_check.sh defaults')
+                commands.append('/etc/init.d/pm_check.sh')
                 for command in commands:
                         subprocess.check_call("/bin/bash -c 'sudo {}'".format(command), shell=True)
         #on_after_startup
