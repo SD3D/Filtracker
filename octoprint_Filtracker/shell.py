@@ -14,7 +14,7 @@ echo "step 4"
 echo "step 5"
 sudo npm install --prefix /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/locbit-edge-master/ > /dev/null 2>&1
 echo "step 6"
-sudo npm install -g pm2
+sudo npm install -g pm2@1.1.3
 echo "step 7"
 sudo pm2 start /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/locbit-edge-master/app.js
 sudo pm2 startup systemd -u root

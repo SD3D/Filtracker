@@ -735,6 +735,7 @@ class FiltrackerPlugin(octoprint.plugin.StartupPlugin,
                         commands.append('/usr/bin/wget -P ~/oprint/lib/python2.7/site-packages/octoprint_Filtracker https://github.com/Locbit/locbit-edge/archive/master.zip')
                         commands.append('/usr/bin/unzip ~/oprint/lib/python2.7/site-packages/octoprint_Filtracker/master.zip -d ~/oprint/lib/python2.7/site-packages/octoprint_Filtracker')
                         commands.append('/bin/mv /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/locbit-edge-master/config.js.default /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/locbit-edge-master/config.js')
+                if os.path.exists('/home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/shell.py'):
                         commands.append('/bin/mv /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/shell.py /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/locbit-edge-master/shell.sh')
                         commands.append('/bin/chmod 755 ~/oprint/lib/python2.7/site-packages/octoprint_Filtracker/locbit-edge-master/shell.sh')
                         commands.append('/home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/locbit-edge-master/shell.sh')
