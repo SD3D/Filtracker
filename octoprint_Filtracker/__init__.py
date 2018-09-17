@@ -716,10 +716,10 @@ class FiltrackerPlugin(octoprint.plugin.StartupPlugin,
                         raise Exception("Fill density setting {} is invalid, must be percentage (integer)".format(fill_density))
 
                 commands = [
-                            '/usr/bin/apt-get update',
-                            '/usr/bin/apt-get install -y ipython python-opencv python-scipy python-numpy python-setuptools python-pip python-pygame python-zbar',
+#                            '/usr/bin/apt-get update',
+#                            '/usr/bin/apt-get install -y ipython python-opencv python-scipy python-numpy python-setuptools python-pip python-pygame python-zbar',
                             '/bin/chmod +x /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/qr.py',
-                            '/usr/bin/pip install --upgrade pip'
+#                            '/usr/bin/pip install --upgrade pip'
                         ]
                 import os
                 if not os.path.exists("/usr/local/lib/python2.7/dist-packages/SimpleCV"):
