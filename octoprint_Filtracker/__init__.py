@@ -956,6 +956,9 @@ class FiltrackerPlugin(octoprint.plugin.StartupPlugin,
                 if event == "PrinterStateChanged" and "state_string" in payload.keys() and payload["state_string"] == 'Printing':
                         octoprint.plugin.SettingsPlugin.on_settings_save(self, {'PrintingStatus': 'Printing'})
                 self._send_printer_status()
+		if event == "PrinterStateChanged" and "state_string" in payload.keys() and payload["state_string"] == 'Cancelled':
+                        octoprint.plugin.SettingsPlugin.on_settings_save(self, {'PrintingStatus': 'Cancelled'})
+                self._send_printer_status()
         
 		if event in FiltrackerMsgDict:    
 			event_body = {
