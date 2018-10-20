@@ -38,6 +38,42 @@ FiltrackerPrintingStatusDict = {
 	},
 	'Idle' : {
 		'PrintingStatus' : 'Idle'
+	},
+	'PRINTING' : {
+		'PrintingStatus' : 'Printing'
+	},
+	'PAUSING' : {
+		'PrintingStatus' : 'Pausing'
+	},
+	'PAUSED' : {
+        	'PrintingStatus' : 'Paused'
+   	 },
+    	'CONNECTING' : {
+        	'PrintingStatus' : 'Connecting'
+   	 },
+    	'OPERATIONAL' : {
+        	'PrintingStatus' : 'Idle'
+   	 },
+    	'ERROR' : {
+        	'PrintingStatus' : 'Error'
+   	 },
+    	'CLOSED_WITH_ERROR' : {
+       		'PrintingStatus' : 'CloseWithError'
+    	},
+    	'TRANSFERING_FILE' : {
+        	'PrintingStatus' : 'TransferingFile'
+    	},
+    	'OFFLINE' : {
+        	'PrintingStatus' : 'Offline'
+    	},
+    	'UNKNOWN' : {
+       		'PrintingStatus' : 'Unknown'
+   	},
+   	'NONE' : {
+        	'PrintingStatus' : 'None'
+    	},
+	'RESUMING' : {
+		'PrintingStatus' : 'Resuming'
 	}
 }
 FiltrackerSlicingStatusDict = {
