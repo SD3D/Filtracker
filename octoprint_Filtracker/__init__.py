@@ -21,7 +21,7 @@ uid = "55de667a295efb62093205e4"
 # url = "http://192.168.0.34:3000"
 #url = "http://api.locbit.com:8888/endpoint"
 url = "http://0.0.0.0:8001/event"
-status_url = 'https://api.locbit.com/statusByLid'
+status_url = 'https://test-api.locbit.com/statusByLid'
 
 HTTP_REQUEST_TIMEOUT=50
 LAYER_HEIGHT_THRESHOLD=0.1
