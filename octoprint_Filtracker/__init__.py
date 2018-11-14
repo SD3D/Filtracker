@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division
 from httplib import BadStatusLine
-from .FiltrackerNotifications import FiltrackerMsgDict, FiltrackerPrintingStatusDict, FiltrackerPrinterStatusDict, FiltrackerSlicingStatusDict
+from .FiltrackerNotifications import FiltrackerMsgDict, FiltrackerPrinterProcessDict, FiltrackerPrintingStatusDict, FiltrackerPrinterStatusDict, FiltrackerSlicingStatusDict
 
 import octoprint.plugin
 from octoprint.slicing import SlicingManager, UnknownProfile
