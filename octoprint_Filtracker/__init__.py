@@ -835,9 +835,10 @@ class FiltrackerPlugin(octoprint.plugin.StartupPlugin,
                             autoPrintMode=True,
                             macAddress='',
                             fillDensity='20',
-                            updateInterval= 300,
+                            updateInterval= 6,
                             PrintingStatus= 'Unknown',
                             PrinterStatus= 'Unknown',
+			    PrinterProcess= 'Unknown',
                             SlicingStatus= 'Unknown'
                             )
 
@@ -962,8 +963,15 @@ class FiltrackerPlugin(octoprint.plugin.StartupPlugin,
                         octoprint.plugin.SettingsPlugin.on_settings_save(self, FiltrackerPrintingStatusDict["Idle"])
 			self._send_printer_status()
                 if event == "PrinterStateChanged" and "state_id" in payload.keys() and FiltrackerPrintingStatusDict.has_key(payload["state_id"]):
-			octoprint.plugin.SettingsPlugin.on_settings_save(self, FiltrackerPrintingStatusDict[payload["state_id"]])
-                	self._send_printer_status()
+                        octoprint.plugin.SettingsPlugin.on_settings_save(self, FiltrackerPrintingStatusDict[payload["state_id"]])
+                        self._send_printer_status()
+                if event in FiltrackerPrinterProcessDict:
+                        self._logger.info("saving printing process event", FiltrackerPrinterProcessDict[event])
+                        octoprint.plugin.SettingsPlugin.on_settings_save(self, FiltrackerPrinterProcessDict[event])
+                        self._send_printer_status()
+                if event == "PrinterStateChanged" and "state_id" in payload.keys() and FiltrackerPrinterProcessDict.has_key(payload["state_id"]):
+                        octoprint.plugin.SettingsPlugin.on_settings_save(self, FiltrackerPrinterProcessDict[payload["state_id"]])
+                        self._send_printer_status()
         
 		if event in FiltrackerMsgDict:    
 			event_body = {
@@ -1087,6 +1095,7 @@ class FiltrackerPlugin(octoprint.plugin.StartupPlugin,
                 color = str(self._get_spool_settings()["color"])
                 diameter = self._get_spool_settings()["diameter"]
                 length = str(self._get_spool_settings()["length"])
+		jobProgress = str(self._get_spool_settings()["jobProgress"])
                 from uuid import getnode as get_mac
                 did = get_mac()
                 printer_status = "Disconnected"
@@ -1101,6 +1110,7 @@ class FiltrackerPlugin(octoprint.plugin.StartupPlugin,
                         "did" : did,
                         "PrinterStatus" : printer_status,
                         "PrintingStatus" : self._settings.get(["PrintingStatus"]),
+                        "PrinterProcess" : self._settings.get(["PrinterProcess"]),
                         "Message" : "",
                         "LastPingTime" : datetime_str
                 }
