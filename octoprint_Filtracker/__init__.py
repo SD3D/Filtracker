@@ -365,7 +365,6 @@ class FiltrackerPlugin(octoprint.plugin.StartupPlugin,
                 output = subprocess.check_output(subprocess_args)
                 
                 json_output = json.loads(output)
-                
                 if 'error' in json_output:
                        return flask.jsonify(error=json_output['error']) 
                 else:
@@ -472,15 +471,17 @@ class FiltrackerPlugin(octoprint.plugin.StartupPlugin,
                         return
 
                 query_params = {'api': SD3D_api_key, 'access': SD3D_access_id}
+                # make try/except to avoid the unhandle error to break the code
+                try:
+                	response = requests.post(Filtracker_info_share_event_uri, params=query_params, headers={'Content-Type': 'application/json'}, data=profile_update_data).json()
+                	self._logger.info('EVENT STAT RESPONSE' * 3 + str(response))
+                	# TODO: check if response has the key called data 
+                	if printer_event == 'PrintStarted' and not response['success']:
+                        	self._logger.error("Profile stats update failed: %s".format(response['data']))
+                        	self._send_client_alert("Could not update profile stats on PrintStart: %s" % response['data'])
+               	except:
+                        self._logger.info('Got error for send to SD3D.locbit.com');
 
-                response = requests.post(Filtracker_info_share_event_uri, params=query_params, headers={'Content-Type': 'application/json'}, data=profile_update_data).json()
-
-                self._logger.info('EVENT STAT RESPONSE' * 3 + str(response))
-                # TODO: check if response has the key called data 
-                if printer_event == 'PrintStarted' and not response['success']:
-                        self._logger.error("Profile stats update failed: %s".format(response['data']))
-                        self._send_client_alert("Could not update profile stats on PrintStart: %s" % response['data'])
-               
         #_download_best_profile
         #if cloud mode is active, it will downoad the best profil available. 
         #self
@@ -925,37 +926,44 @@ class FiltrackerPlugin(octoprint.plugin.StartupPlugin,
 			self.sendLayerStatus(Layer)
                         self._update_spool_length(update_remote=True)
                         self._update_profile_event_stats(event)
-                        self._download_best_profile() 
+                        self._download_best_profile()
+			self._send_printer_status() 
 		elif event == "PrintFailed":
 			Layer = 0
 			self.sendLayerStatus(Layer)
                         self._update_spool_length(update_remote=True)
                         self._update_profile_event_stats(event)
+			self._send_printer_status()
 		elif event == "PrintCancelled":
 			Layer = 0
 			self.sendLayerStatus(Layer)
                         self._update_spool_length(update_remote=True)
                         self._update_profile_event_stats(event)
+			self._send_printer_status()
                 elif event == "PrintDone":
                         self._update_spool_length(update_remote=True)
                         self._update_profile_event_stats(event) 
+			self._send_printer_status()
                 elif event == "PrintPaused":
                         self._update_spool_length(update_remote=True)
                         self._update_profile_event_stats(event)
+			self._send_printer_status()
                 elif event == "PrintResumed":
                         self._update_profile_event_stats(event)
+			self._send_printer_status()
                 elif event == "Upload":
                         self._auto_print(payload)
                         self._download_best_profile()
                 if event in FiltrackerPrintingStatusDict:
                         self._logger.info("saving printing status event", FiltrackerPrintingStatusDict[event])
                         octoprint.plugin.SettingsPlugin.on_settings_save(self, FiltrackerPrintingStatusDict[event])
-                        self._send_printer_status() 
+			self._send_printer_status()
                 if event == "Startup" and self._printer.is_printing() is not True:
-                         octoprint.plugin.SettingsPlugin.on_settings_save(self, FiltrackerPrintingStatusDict["Idle"])
-                if event == "PrinterStateChanged" and "state_string" in payload.keys() and payload["state_string"] == 'Printing':
-                        octoprint.plugin.SettingsPlugin.on_settings_save(self, {'PrintingStatus': 'Printing'})
-                self._send_printer_status()
+                        octoprint.plugin.SettingsPlugin.on_settings_save(self, FiltrackerPrintingStatusDict["Idle"])
+			self._send_printer_status()
+                if event == "PrinterStateChanged" and "state_id" in payload.keys() and FiltrackerPrintingStatusDict.has_key(payload["state_id"]):
+			octoprint.plugin.SettingsPlugin.on_settings_save(self, FiltrackerPrintingStatusDict[payload["state_id"]])
+                	self._send_printer_status()
         
 		if event in FiltrackerMsgDict:    
 			event_body = {
@@ -1085,6 +1093,10 @@ class FiltrackerPlugin(octoprint.plugin.StartupPlugin,
                 printer_connection = self._printer.get_current_connection()
                 if printer_connection[0] is not "Closed":
                         printer_status = "Connected"
+
+                # Each when this function trigger, it will check the latest printing status
+                if FiltrackerPrintingStatusDict.has_key(self._printer.get_state_id()):
+                        octoprint.plugin.SettingsPlugin.on_settings_save(self, FiltrackerPrintingStatusDict[self._printer.get_state_id()])
                 event_dict = {
                         "did" : did,
                         "PrinterStatus" : printer_status,
@@ -1101,7 +1113,8 @@ class FiltrackerPlugin(octoprint.plugin.StartupPlugin,
                         event_dict["Color"] = color
                 if len(diameter) > 0:
                         event_dict["Diameter"] = diameter
-                if len(length) > 0 and int(length) >= 0:
+                # Convert the value to float if the value is not int, that would fix the problem on the length which is not int
+                if len(length) > 0 and float(length) >= 0:
                         event_dict['Length'] = length
                 return event_dict    
 
