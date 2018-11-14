@@ -39,6 +39,9 @@ FiltrackerPrintingStatusDict = {
 	'Idle' : {
 		'PrintingStatus' : 'Idle'
 	},
+	'Disconnecting' : {
+		'PrintingStatus' : 'Disconnecting'
+	},
 	'PRINTING' : {
 		'PrintingStatus' : 'Printing'
 	},
@@ -52,28 +55,135 @@ FiltrackerPrintingStatusDict = {
         	'PrintingStatus' : 'Connecting'
    	 },
     	'OPERATIONAL' : {
-        	'PrintingStatus' : 'Idle'
+       		'PrintingStatus' : 'Idle'
    	 },
-    	'ERROR' : {
-        	'PrintingStatus' : 'Error'
+   	'ERROR' : {
+     		'PrintingStatus' : 'Error'
    	 },
-    	'CLOSED_WITH_ERROR' : {
-       		'PrintingStatus' : 'CloseWithError'
-    	},
-    	'TRANSFERING_FILE' : {
-        	'PrintingStatus' : 'TransferingFile'
-    	},
-    	'OFFLINE' : {
-        	'PrintingStatus' : 'Offline'
-    	},
-    	'UNKNOWN' : {
+   	'CLOSED_WITH_ERROR' : {
+      	 	'PrintingStatus' : 'Error'
+    	 },
+   	'TRANSFERING_FILE' : {
+     		'PrintingStatus' : 'TransferingFile'
+    	 },
+   	'OFFLINE' : {
+      		'PrintingStatus' : 'Offline'
+   	 },
+  	'UNKNOWN' : {
        		'PrintingStatus' : 'Unknown'
-   	},
+   	 },
    	'NONE' : {
         	'PrintingStatus' : 'None'
-    	},
+    	 },
 	'RESUMING' : {
 		'PrintingStatus' : 'Resuming'
+	 },
+	'CANCELLING' : {
+		'PrintingStatus' : 'Cancelling'
+	}
+}
+FiltrackerPrinterProcessDict = {
+	'PrintStarted' : {
+		'PrinterProcess' : 'Printing'
+	},
+	'PrintPaused' : {
+		'PrinterProcess' : 'Paused'
+	},
+	'PrintDone' : {
+		'PrinterProcess' : 'Complete'
+	},
+	'PrintCancelled' : {
+		'PrinterProcess' : 'Cancelled'
+	},
+	'PrintFailed' : {
+		'PrinterProcess' : 'Failed'
+	},
+	'PrintResumed' : {
+		'PrinterProcess' : 'Resume'
+	},
+	'PrintingStatus' : {
+		'PrinterProcess' : 'Unknown'
+	},
+	'Idle' : {
+		'PrinterProcess' : 'Idle'
+	},
+	'Disconnecting' : {
+		'PrinterProcess' : 'Disconnecting'
+	},
+	'PRINTING' : {
+		'PrinterProcess' : 'Printing'
+	},
+	'PAUSING' : {
+		'PrinterProcess' : 'Pausing'
+	},
+	'PAUSED' : {
+        	'PrinterProcess' : 'Paused'
+   	 },
+    	'CONNECTING' : {
+        	'PrinterProcess' : 'Connecting'
+   	 },
+    	'OPERATIONAL' : {
+       		'PrinterProcess' : 'Operational'
+   	 },
+    	'ERROR' : {
+        	'PrinterProcess' : 'Error'
+   	 },
+    	'CLOSED_WITH_ERROR' : {
+       		'PrinterProcess' : 'FailedWithError'
+    	 },
+    	'TRANSFERING_FILE' : {
+        	'PrinterProcess' : 'TransferingFile'
+    	 },
+    	'OFFLINE' : {
+        	'PrinterProcess' : 'Offline'
+    	 },
+    	'UNKNOWN' : {
+       		'PrinterProcess' : 'Unknown'
+   	 },
+   	'NONE' : {
+        'PrinterProcess' : 'None'
+    },
+	'RESUMING' : {
+		'PrinterProcess' : 'ResumingPrint'
+	},
+	'ConnectivityChanged' : {
+		'PrinterProcess' : 'ConnectionChanged'
+	},
+	'FirmwareData' : {
+		'PrinterProcess' : 'FirmwareLoaded'
+	},
+	'FileAdded' : {
+		'PrinterProcess' : 'FileAdded'
+	},
+	'UpdatedFiles' : {
+		'PrinterProcess' : 'UpdatedFileList'
+	},
+	'MetadataAnalysisStarted' : {
+		'PrinterProcess' : 'StartingFileAnalysis'
+	},
+	'Upload' : {
+		'PrinterProcess' : 'FileUploadInitiated'
+	},
+	'MetadataAnalysisFinished' : {
+		'PrinterProcess' : 'FileAnalysisComplete'
+	},
+	'PrintStarted' : {
+		'PrinterProcess' : 'PrintStarted'
+	},
+	'Home' : {
+		'PrinterProcess' : 'HomeAxis'
+	},
+	'ToolChange' : {
+		'PrinterProcess' : 'ToolChange'
+	},
+	'ZChange' : {
+		'PrinterProcess' : 'LayerChange'
+	},
+	'MetadataStatisticsUpdated' : {
+		'PrinterProcess' : 'UpdatedProcessStats'
+	},
+	'PrintCancelling' : {
+		'PrinterProcess' : 'CancellingPrint'
 	}
 }
 FiltrackerSlicingStatusDict = {
@@ -103,8 +213,12 @@ FiltrackerMsgDict = {
 		'value' : 'Disconnected'
 	},
 	'Error' : {
-		'name' : 'PrinterStatus',
+		'name' : 'PrintingStatus',
 		'value' : 'Error'
+	},
+	'Idle' : {
+		'name' : 'PrintingStatus',
+		'value' : 'Idle'
 	},
 	'PrintStarted' : {
 		'name' : 'PrintingStatus',
@@ -129,6 +243,58 @@ FiltrackerMsgDict = {
 	'PrintResumed' : {
 		'name' : 'PrintingStatus',
 		'value' : 'Printing'
+	},
+	'ConnectivityChanged' : {
+		'name' : 'PrinterProcess',
+		'value' : 'ConnectionChanged'
+	},
+	'FirmwareData' : {
+		'name' : 'PrinterProcess',
+		'value' : 'FirmwareLoaded'
+	},
+	'FileAdded' : {
+		'name' : 'PrinterProcess',
+		'value' : 'FileAdded'
+	},
+	'UpdatedFiles' : {
+		'name' : 'PrinterProcess',
+		'value' : 'UpdatedFileList'
+	},
+	'MetadataAnalysisStarted' : {
+		'name' : 'PrinterProcess',
+		'value' : 'StartingFileAnalysis'
+	},
+	'Upload' : {
+		'name' : 'PrinterProcess',
+		'value' : 'FileUploadInitiated'
+	},
+	'MetadataAnalysisFinished' : {
+		'name' : 'PrinterProcess',
+		'value' : 'FileAnalysisComplete'
+	},
+	'MetadataStatisticsUpdated' : {
+		'name' : 'PrinterProcess',
+		'value' : 'UpdatedProcessStats'
+	},
+	'Home' : {
+		'name' : 'PrinterProcess',
+		'value' : 'HomeAxis'
+	},
+	'ToolChange' : {
+		'name' : 'PrinterProcess',
+		'value' : 'ToolChange'
+	},
+	'ZChange' : {
+		'name' : 'PrinterProcess',
+		'value' : 'LayerChange'
+	},
+	'Connecting' : {
+		'name' : 'PrinterProcess',
+		'value' : 'Connecting'
+	},
+	'Disconnecting' : {
+		'name' : 'PrinterProcess',
+		'value' : 'Disconnecting'
 	},
 	'FileDeselected' : {
 		'name' : 'File',
