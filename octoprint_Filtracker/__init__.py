@@ -1126,8 +1126,8 @@ class FiltrackerPlugin(octoprint.plugin.StartupPlugin,
                         event_dict["Diameter"] = diameter
 		if len(jobProgress) > 0:
                         event_dict["jobProgress"] = jobProgress
-		if len(Message) > 0:
-                        event_dict["Message"] = message
+		if len(message) > 0:
+                        event_dict["message"] = message
                 # Convert the value to float if the value is not int, that would fix the problem on the length which is not int
                 if len(length) > 0 and float(length) >= 0:
                         event_dict['Length'] = length
