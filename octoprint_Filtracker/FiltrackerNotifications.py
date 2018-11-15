@@ -36,9 +36,9 @@ FiltrackerPrintingStatusDict = {
 	'PrintingStatus' : {
 		'PrintingStatus' : 'Unknown'
 	},
-	'Idle' : {
-		'PrintingStatus' : 'Idle'
-	},
+#	'Idle' : {
+#		'PrintingStatus' : 'Idle'
+#	},
 	'Disconnecting' : {
 		'PrintingStatus' : 'Disconnecting'
 	},
@@ -54,9 +54,9 @@ FiltrackerPrintingStatusDict = {
     	'CONNECTING' : {
         	'PrintingStatus' : 'Connecting'
    	 },
-    	'OPERATIONAL' : {
-       		'PrintingStatus' : 'Idle'
-   	 },
+#    	'OPERATIONAL' : {
+#      		'PrintingStatus' : 'Idle'
+#   	 },
    	'ERROR' : {
      		'PrintingStatus' : 'Error'
    	 },
@@ -107,9 +107,9 @@ FiltrackerPrinterProcessDict = {
 	'Idle' : {
 		'PrinterProcess' : 'Idle'
 	},
-	'Disconnecting' : {
-		'PrinterProcess' : 'Disconnecting'
-	},
+#	'Disconnecting' : {
+#		'PrinterProcess' : 'Disconnecting'
+#	},
 	'PRINTING' : {
 		'PrinterProcess' : 'Printing'
 	},
@@ -123,11 +123,11 @@ FiltrackerPrinterProcessDict = {
         	'PrinterProcess' : 'Connecting'
    	 },
     	'OPERATIONAL' : {
-       		'PrinterProcess' : 'Operational'
+       		'PrinterProcess' : 'Idle'
    	 },
-    	'ERROR' : {
-        	'PrinterProcess' : 'Error'
-   	 },
+#    	'ERROR' : {
+#        	'PrinterProcess' : 'Error'
+#   	 },
     	'CLOSED_WITH_ERROR' : {
        		'PrinterProcess' : 'FailedWithError'
     	 },
@@ -141,8 +141,8 @@ FiltrackerPrinterProcessDict = {
        		'PrinterProcess' : 'Unknown'
    	 },
    	'NONE' : {
-        'PrinterProcess' : 'None'
-    },
+        	'PrinterProcess' : 'None'
+    	},
 	'RESUMING' : {
 		'PrinterProcess' : 'ResumingPrint'
 	},
@@ -182,9 +182,9 @@ FiltrackerPrinterProcessDict = {
 	'MetadataStatisticsUpdated' : {
 		'PrinterProcess' : 'UpdatedProcessStats'
 	},
-	'PrintCancelling' : {
-		'PrinterProcess' : 'CancellingPrint'
-	}
+#	'PrintCancelling' : {
+#		'PrinterProcess' : 'CancellingPrint'
+#	}
 }
 FiltrackerSlicingStatusDict = {
 	'SlicingStarted' : {
@@ -217,7 +217,7 @@ FiltrackerMsgDict = {
 		'value' : 'Error'
 	},
 	'Idle' : {
-		'name' : 'PrintingStatus',
+		'name' : 'PrinterProcess',
 		'value' : 'Idle'
 	},
 	'PrintStarted' : {
