@@ -835,7 +835,7 @@ class FiltrackerPlugin(octoprint.plugin.StartupPlugin,
                             autoPrintMode=True,
                             macAddress='',
                             fillDensity='20',
-                            updateInterval= 6,
+                            updateInterval= 2,
                             PrintingStatus= 'Unknown',
                             PrinterStatus= 'Unknown',
 			    PrinterProcess= 'Unknown',
@@ -1123,6 +1123,8 @@ class FiltrackerPlugin(octoprint.plugin.StartupPlugin,
                         event_dict["Color"] = color
                 if len(diameter) > 0:
                         event_dict["Diameter"] = diameter
+		if len(jobProgress) > 0:
+                        event_dict["jobProgress"] = jobProgress
                 # Convert the value to float if the value is not int, that would fix the problem on the length which is not int
                 if len(length) > 0 and float(length) >= 0:
                         event_dict['Length'] = length
