@@ -826,6 +826,7 @@ class FiltrackerPlugin(octoprint.plugin.StartupPlugin,
                             initial_length='',
                             length='',
                             muid='',
+			      message='',
                             SD3DAPIKey='yCX9PgjsvzGuaKTT9yuUIJFehPHjMknU',
                             SD3DAccessID='DxM7QlAsDo43Z0SJW1qwLh4FBXGQlaGU',
                             jobProgress='',
@@ -1095,7 +1096,8 @@ class FiltrackerPlugin(octoprint.plugin.StartupPlugin,
                 color = str(self._get_spool_settings()["color"])
                 diameter = self._get_spool_settings()["diameter"]
                 length = str(self._get_spool_settings()["length"])
-		jobProgress = str(self._get_spool_settings()["jobProgress"])
+		  jobProgress = str(self._get_spool_settings()["jobProgress"])
+		  message = str(self._settings.get(["message"]))
                 from uuid import getnode as get_mac
                 did = get_mac()
                 printer_status = "Disconnected"
@@ -1111,7 +1113,6 @@ class FiltrackerPlugin(octoprint.plugin.StartupPlugin,
                         "PrinterStatus" : printer_status,
                         "PrintingStatus" : self._settings.get(["PrintingStatus"]),
                         "PrinterProcess" : self._settings.get(["PrinterProcess"]),
-                        "Message" : "",
                         "LastPingTime" : datetime_str
                 }
 
@@ -1125,6 +1126,8 @@ class FiltrackerPlugin(octoprint.plugin.StartupPlugin,
                         event_dict["Diameter"] = diameter
 		if len(jobProgress) > 0:
                         event_dict["jobProgress"] = jobProgress
+		if len(Message) > 0:
+                        event_dict["Message"] = message
                 # Convert the value to float if the value is not int, that would fix the problem on the length which is not int
                 if len(length) > 0 and float(length) >= 0:
                         event_dict['Length'] = length
