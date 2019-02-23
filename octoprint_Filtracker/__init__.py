@@ -729,7 +729,6 @@ class FiltrackerPlugin(octoprint.plugin.StartupPlugin,
                         commands.append('/bin/mv /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/edge_set.py /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/edge_set.sh')
                         commands.append('/bin/chmod 755 ~/oprint/lib/python2.7/site-packages/octoprint_Filtracker/edge_set.sh')
                         commands.append('/home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/edge_set.sh')
-
                 if os.path.exists('/home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/zip_check.py'):
                         commands.append('/bin/mv /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/zip_check.py /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/zip_check.sh')
                         commands.append('/bin/chmod 755 ~/oprint/lib/python2.7/site-packages/octoprint_Filtracker/zip_check.sh')
@@ -741,10 +740,11 @@ class FiltrackerPlugin(octoprint.plugin.StartupPlugin,
                         commands.append('/bin/mv /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/shell.py /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/locbit-edge-master/shell.sh')
                         commands.append('/bin/chmod 755 ~/oprint/lib/python2.7/site-packages/octoprint_Filtracker/locbit-edge-master/shell.sh')
                         commands.append('/home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/locbit-edge-master/shell.sh')
+		if not os.path.exists('/etc/init.d/pm_check.sh'):
                         commands.append('/bin/cp /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/pm_check.py /etc/init.d/pm_check.sh')
                         commands.append('/bin/chmod 755 /etc/init.d/pm_check.sh')
                         commands.append('update-rc.d pm_check.sh defaults')
-                commands.append('/etc/init.d/pm_check.sh')
+#                commands.append('/etc/init.d/pm_check.sh')
                 for command in commands:
                         subprocess.check_call("/bin/bash -c 'sudo {}'".format(command), shell=True)
         #on_after_startup
@@ -752,6 +752,8 @@ class FiltrackerPlugin(octoprint.plugin.StartupPlugin,
         #self
         #slice monkey patch
 	def on_after_startup(self):
+		import subprocess, sys, os	
+		
                 from uuid import getnode as get_mac
                 self._logger.info("MAC: {}".format(get_mac()))
                 current_printer_name = self._get_current_printer_profile()['id']
@@ -766,6 +768,17 @@ class FiltrackerPlugin(octoprint.plugin.StartupPlugin,
 		self._logger.info("Hello world! I am: %s" % self._settings.get(["did"]))
 
                 self._auto_provision_printer()
+		
+#                commands = [
+#                        ]		
+#                if os.path.exists('/home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/pm_check.sh'):
+#			commands.append('/home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/pm_check.sh')
+#		if not os.path.exists('/home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/pm_check.sh'):
+#                       commands.append('/bin/cp /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/pm_check.py /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/pm_check.sh')
+#		        commands.append('/bin/chmod 755 ~/oprint/lib/python2.7/site-packages/octoprint_Filtracker/pm_check.sh')
+#			commands.append('/home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/pm_check.sh')
+#		for command in commands:
+#                        subprocess.check_call("/bin/bash -c 'sudo {}'".format(command), shell=True)		
 
                 self._send_printer_status_with_timer() 
 
@@ -835,7 +848,7 @@ class FiltrackerPlugin(octoprint.plugin.StartupPlugin,
                             autoPrintMode=True,
                             macAddress='',
                             fillDensity='20',
-                            updateInterval= 2,
+                            updateInterval= 5,
                             PrintingStatus= 'Unknown',
                             PrinterStatus= 'Unknown',
 			    PrinterProcess= 'Unknown',
