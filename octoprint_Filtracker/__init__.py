@@ -769,14 +769,13 @@ class FiltrackerPlugin(octoprint.plugin.StartupPlugin,
                 self._auto_provision_printer()
 		
                 commands = [
-                            'pm2 stop all',
-                            'pm2 start /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/locbit-edge-master/app.js'
                         ]		
-#                if os.path.exists('/home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/pm_check.sh'):
-#			commands.append('/home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/pm_check.sh')
-#		if not os.path.exists('/home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/pm_check.sh'):
-#                        commands.append('/bin/cp /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/pm_check.py /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/pm_check.sh')
-#		        commands.append('/home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/pm_check.sh')
+                if os.path.exists('/home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/pm_check.sh'):
+			commands.append('/home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/pm_check.sh')
+		if not os.path.exists('/home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/pm_check.sh'):
+                        commands.append('/bin/cp /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/pm_check.py /home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/pm_check.sh')
+		        commands.append('/bin/chmod 755 ~/oprint/lib/python2.7/site-packages/octoprint_Filtracker/pm_check.sh')
+			commands.append('/home/pi/oprint/lib/python2.7/site-packages/octoprint_Filtracker/pm_check.sh')
 		for command in commands:
                         subprocess.check_call("/bin/bash -c 'sudo {}'".format(command), shell=True)		
 
